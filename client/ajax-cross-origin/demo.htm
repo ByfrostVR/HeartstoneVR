@@ -1,0 +1,67 @@
+<html>
+<head>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="js/jquery.ajax-cross-origin.min.js"></script>
+</head>
+
+<body>
+
+<select id="service">
+	<option value="http://ip.jsontest.com/">IP Address</option>
+	<option value="http://headers.jsontest.com/">HTTP Headers</option>
+	<option value="http://date.jsontest.com/">Date & Time</option>
+	<option value="http://echo.jsontest.com/key/value/one/two">Echo JSON</option>
+	<option value='http://validate.jsontest.com/?json={"key":"value"};'>Validate</option>
+	<option value="http://code.jsontest.com/">Arbitrary JS Code</option>
+	<option value="http://cookie.jsontest.com/">Cookie</option>
+	<option value="http://md5.jsontest.com/?text=[text%20to%20MD5]">MD5</option>
+</select><br/>
+<input type="text" id="url" style="width: 400px">
+<input type="button" id="btn" value="Get JSON">
+<br/><br/>
+<div id="test" />
+
+<script type="text/javascript">
+$(function() {
+	$( '#service' ).on( 'change', function(){
+		$( '#url' ).val( $( this ).val() );
+	});
+	
+	$( '#url' ).val( $( '#service' ).val() );
+	
+	$( '#btn' ).click(function(){
+		var url = $( '#url' ).val()
+		
+		$.ajax({
+		  crossOrigin: true,
+		  url: url,
+		  //dataType: "json", //no need. if you use crossOrigin, the dataType will be override with "json"
+		  //charset: 'ISO-8859-1', //use it to define the charset of the target url
+		  context: {},
+		  success: function(data) {
+			  //alert(data);
+			  $( '#test' ).html(data);
+			}
+		})
+		.done(function( data, textStatus, jqXHR ) {
+			//alert(data);
+		});
+	});
+	
+/*########################################################
+	before the use of $.getJSON you need to set {crossOrigin: true} through $.ajaxSetup
+	
+	$.ajaxSetup({
+		crossOrigin: true
+	});
+	
+	$.getJSON(url, null, function(data) {
+		$( '#test' ).html(data);
+	});
+########################################################*/
+	
+}); 
+</script>
+
+</body>
+</html>
