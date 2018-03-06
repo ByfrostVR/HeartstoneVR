@@ -1,0 +1,16 @@
+{
+  "name": "peerjstesting",
+  "version": "1.0.0",
+  "description": "try peerjs",
+  "main": "home.ejs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^2.5.7",
+    "peer": "^0.2.8",
+    "peerjs": "^0.3.14"
+  }
+}

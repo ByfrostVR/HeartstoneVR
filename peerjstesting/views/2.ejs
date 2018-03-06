@@ -1,0 +1,30 @@
+<title>
+  Peerjs</title>
+<script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+<script>
+//create peer
+  var peer = new Peer('two', {
+    host: 'localhost',
+    port: 9000,
+    path: '/myapp'
+  });
+
+
+  // var conn = peer.connect('one');
+  // conn.on('open', function() {
+  //   conn.on('data', function(data){
+  //     console.log("Recieved", data);
+  //   })
+  //   console.log("connection2");
+  //   conn.send("hello");
+  // })
+//on connection do something
+peer.on('connection', function(conn){
+  console.log("connection it is!");
+  conn.on('data', function(data){
+    console.log(data);
+  })
+})
+</script>
+
+<h1>check the console</h1>
