@@ -17,7 +17,7 @@ app.post('/api/v1/login', function(req, res) {
   var username = req.body[0].value;
   //var firend_id = req.body.friend;
   var password = req.body[1].value
-
+  //here needs to be authentication
   state.loggedin = {
     "username": username,
     "password": password
@@ -25,7 +25,7 @@ app.post('/api/v1/login', function(req, res) {
 
   console.log("state:")
   console.log(state);
-
+//enable Access-Control-Allow-Origin
   res.set({
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",

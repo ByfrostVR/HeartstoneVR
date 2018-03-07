@@ -8,8 +8,11 @@
     <%= title %>
   </title>
   <script>
+  //send the login data to the main server for authentication
     function sendData() {
+      //get the data from the form and alter it to json file
       var formData = JSON.stringify($("#myform").serializeArray());
+      //send the data as POST
       $.ajax({
         crossOrigin: true,
         type: "POST",
