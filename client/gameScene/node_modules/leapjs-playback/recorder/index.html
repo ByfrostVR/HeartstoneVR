@@ -1,0 +1,331 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Leap Recorder</title>
+  <link rel="shortcut icon" href="images/favicon-32.png">
+
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="stylesheets/lib/angular.rangeSlider.css">
+
+  <script src="javascripts/lib/jquery-2.1.0.min.js"></script>
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  <script src="javascripts/lib/FileSaver.js"></script>
+  <script src="javascripts/lib/spin.min.js"></script>
+  <script src="javascripts/lib/angular.js"></script>
+  <script src="javascripts/lib/angular.rangeSlider.js"></script>
+  <script src="javascripts/lib/angular-spinner.min.js"></script>
+  <script src="javascripts/lib/angulartics.min.js"></script>
+  <script src="javascripts/lib/angulartics-ga.min.js"></script>
+
+  <link href="bower_components/angular-xeditable/dist/css/xeditable.css" rel="stylesheet">
+  <script src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
+
+  <link href="bower_components/highlightjs/styles/default.css" rel="stylesheet">
+  <script src="bower_components/highlightjs/highlight.pack.js"></script>
+
+  <link rel="stylesheet" href="stylesheets/main.css">
+  <link rel="stylesheet" href="stylesheets/controls.css">
+  <link rel="stylesheet" href="stylesheets/data-collection.css">
+
+  <script src="javascripts/lib/three.min.js"></script>
+  <script src="javascripts/lib/TrackballControls.js"></script>
+
+  <script src="//js.leapmotion.com/leap-0.6.4.min.js"></script>
+  <script src="//js.leapmotion.com/leap-plugins-0.1.8.js"></script>
+  <script src="//js.leapmotion.com/leap.rigged-hand-0.1.5.js"></script>
+  <script src="../build/leap.playback-0.2.1.js"></script>
+
+  <script src="javascripts/recorder.js"></script>
+  <script src="javascripts/controls.js"></script>
+  <script src="javascripts/data-collection.js"></script>
+  <script src="javascripts/metadata.js"></script>
+
+</head>
+<body ng-app="Recorder">
+
+<!-- handle html5 file drag/drop -->
+<div id="dropzone">
+  <span>
+    Set Recording
+  </span>
+</div>
+
+<!-- For the time being, this controller manages recordings which get used -->
+<div data-ng-controller="DataCollection" ng-show="mode != 'recording' && mode != 'off'">
+
+  <section class="row" id="changeRecording" ng-animate="'animate'" ng-show="mode == 'intro'">
+
+    <div class="col-xs-2 changeRecordingControl">
+      <button ng-click="previous($event)" class="btn btn-default btn-double">
+        <i class="glyphicon glyphicon-chevron-left"></i>
+      </button>
+    </div>
+
+    <div class="col-xs-8">
+      <h2>{{title() || 'Untitled Recording'}}</h2>
+      <p class="recordingDescription">{{currentRecording().metadata.description}}</p>
+
+      <div class="pull-right">
+        <button class="btn btn-default" ng-click="replay($event)" ng-disabled="!canReplay()">
+          Replay
+        </button>
+        <button class="btn btn-default btn-success" ng-click="record()">
+          Make Recording
+        </button>
+      </div>
+    </div>
+
+    <div class="col-xs-2 changeRecordingControl" style="text-align: right;">
+      <button ng-click="next($event)" class="btn btn-default btn-double">
+        <i class="glyphicon glyphicon-chevron-right"></i>
+      </button>
+    </div>
+    <div class="clearfix"></div>
+  </section>
+
+  <!-- todo: leap-enable! -->
+  <section class="row" id="acceptRecording" ng-animate="'animate'" ng-show="mode == 'outro'">
+    <div class="col-xs-8 col-xs-offset-2">
+      <h2>Deliver Recording?</h2>
+      <p class="recordingDescription">
+      </p>
+      <div class="pull-right">
+        <button class="btn btn-default" ng-click="discard()">Discard</button>
+        <button class="btn btn-primary" ng-click="save()">Save & Send</button>
+      </div>
+    </div>
+  </section>
+  <hr/>
+</div>
+
+<div id="controls" data-ng-controller="Controls">
+  <div id="range"
+       pin-handle="{{pinHandle}}"
+       range-slider min="0" max="recordingLength()" model-min="leftHandlePosition" model-max="rightHandlePosition"
+       ng-show="mode == 'crop' || mode == 'playback'"></div>
+
+  <div class="btn-group btn-group-lg dropup">
+
+    <button type="button" class="btn btn-default" ng-click="record()" ng-class="{active: mode=='record'}" id="record">
+
+      <i class="glyphicon glyphicon-record" ng-class="{orange: recordPending(), red: recording()}"></i>
+
+      <span class="hotkey">R</span>ecord
+
+    </button>
+
+    <button type="button" class="btn btn-default" ng-click="crop()" ng-class="{active: mode=='crop'}" ng-disabled="canPlayBack()" id="crop">
+
+      <span style="margin-top: -2px; display: inline-block; vertical-align: top;">[ ]</span>
+
+      <span class="hotkey">C</span>rop
+
+    </button>
+
+    <button style="text-align: left" type="button" class="btn btn-default" ng-click="playback()" ng-class="{active: mode=='playback'}" ng-disabled="canPlayBack()">
+
+      <span ng-show="player().loading()" us-spinner="{radius:4, width:2, length: 4, left: '20px'}" style="width: 18px; display: inline-block;"></span>
+
+      <span ng-show="!player().loading() && !pauseOnPlaybackButtonClick()">&#9654;</span>
+
+      <span ng-show="!player().loading() && pauseOnPlaybackButtonClick()"><i class="glyphicon glyphicon-pause"></i></span>
+
+      <span class="hotkey">P</span>layback
+
+    </button>
+
+  </div>
+
+
+
+  <div class="btn-group btn-group-lg dropup" style="text-align: left;">
+    <button type="button" class="btn btn-default" ng-click="save()">Download</button>
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#" ng-click="save()"><b>Compressed</b></a></li>
+      <li><a href="#" ng-click="save('json')">As JSON</a></li>
+    </ul>
+  </div>
+
+  <div class="pull-right">
+    <a href="#" onclick="$('#helpModal').modal('toggle')">
+      <!-- todo: should change href to help and use angular router.. -->
+      <i class="glyphicon glyphicon-info-sign help-modal-control"></i>
+    </a>
+  </div>
+
+</div>
+
+<!--
+ Bootstrap requires tabindex=-1 for escape key :-/
+ http://stackoverflow.com/questions/12630156/how-do-you-enable-the-escape-key-close-functionality-in-a-twitter-bootstrap-moda
+ -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- https://github.com/blog/273-github-ribbons -->
+      <a target="_blank" href="https://github.com/leapmotion/leapjs-playback"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 1;" src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
+      <div class="modal-header">
+        <h4 class="modal-title">Shortcuts</h4>
+      </div>
+      <div class="modal-body">
+          <table>
+            <tr>
+              <td>r</td>
+              <td> &nbsp;:&nbsp;</td>
+              <td>record</td>
+            </tr>
+            <tr>
+              <td>c</td>
+              <td> &nbsp;:&nbsp;</td>
+              <td>crop</td>
+            </tr>
+            <tr>
+              <td>p</td>
+              <td> &nbsp;:&nbsp;</td>
+              <td>playback</td>
+            </tr>
+            <tr>
+              <td>s</td>
+              <td> &nbsp;:&nbsp;</td>
+              <td>save/download</td>
+            </tr>
+            <tr>
+              <td>f</td>
+              <td> &nbsp;:&nbsp;</td>
+              <td>fullscreen</td>
+            </tr>
+            <tr>
+              <td>m</td>
+              <td> &nbsp;:&nbsp;</td>
+              <td>show metadata</td>
+            </tr>
+            <tr>
+              <td>?</td>
+              <td> &nbsp;:&nbsp;</td>
+              <td>help</td>
+            </tr>
+            <tr>
+              <td colspan="3">
+                Drag 'n' drop to set recording.
+              </td>
+            </tr>
+          </table>
+        <br/>
+        <div class="pull-right" style="margin-top: 1em;">
+          <a href="https://github.com/leapmotion/leapjs-playback" target="_blank">Docs</a>
+        </div>
+        <h4>Usage</h4>
+        <hr/>
+<pre><code>  var controller = new Leap.Controller();
+  controller
+    .use('playback', {
+      recording: 'leap-playback-recording-110fps.json.lz'
+    })
+    .connect()</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="metadata" data-ng-controller="Metadata" tabindex="-1" ng-keypress="stripKeycodes($event)">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Metadata</h4>
+      </div>
+
+      <div class="modal-body">
+
+
+        <table>
+
+          <tr>
+            <td>title</td>
+            <td>
+              <a href="#" editable-text="metadata.title">
+                {{metadata.title || 'Edit'}}
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>description</td>
+            <td>
+              <a href="#" editable-textarea="metadata.description" e-rows="2" e-cols="40">
+                {{metadata.description || 'Edit'}}
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>formatVersion</td>
+            <td>{{metadata.formatVersion}}</td>
+          </tr>
+          <tr>
+            <td>frameRate</td>
+            <td>{{metadata.frameRate}}</td>
+          </tr>
+          <tr>
+            <td>frames</td>
+            <td>{{metadata.frames}}</td>
+          </tr>
+          <tr>
+            <td>generatedBy</td>
+            <td>{{metadata.generatedBy}}</td>
+          </tr>
+          <tr>
+            <td>protocolVersion</td>
+            <td>{{metadata.protocolVersion}}</td>
+          </tr>
+          <tr>
+            <td>url</td>
+            <td>{{metadata.url}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+
+  (window.controller = new Leap.Controller({background: true}))
+    .use('playback', {
+      loop: false,
+      pauseHotkey: false,
+      pauseOnHand: false
+    })
+    .use('riggedHand')
+    .connect();
+
+
+//  controls = new THREE.TrackballControls( window.controller.plugins.riggedHand.camera )
+//  controller.on('frame', function(){
+//    controls.update()
+//  });
+//  window.addEventListener( 'resize', function(){
+//    controls.handleResize();
+//  });
+
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-31536531-11', 'leapmotion.github.io');
+  // http://luisfarzati.github.io/angulartics/
+  // delete this line if using router:
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>
