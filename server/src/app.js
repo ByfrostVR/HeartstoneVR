@@ -1,6 +1,11 @@
 var express = require("express")
 var app = express()
 
+import createPlayer from './createPlayer.js'
+import findPlayer from './authentication.js'
+import * from './createGame.js'
+
+
 var state = {};
 state.loggedin = {};
 state.event = [];
@@ -13,41 +18,57 @@ app.use(bodyParser.urlencoded({
 
 // POST http://localhost:8080/api/users
 // parameters sent with
+
 app.post('/api/v1/login', function(req, res) {
   var username = req.body[0].value;
   //var firend_id = req.body.friend;
   var password = req.body[1].value
-  //here needs to be authentication
-  state.loggedin = {
-    "username": username,
-    "password": password
-  };
 
-  console.log("state:")
-  console.log(state);
-//enable Access-Control-Allow-Origin
+  //enable Access-Control-Allow-Origin
+
+  //authentication
+  if (findPlayer(username, password)) {
+    res.send('{"status":"logged in"}');
+  } else {
+    res.send('{"status":"undefiened"}')
+  }
   res.set({
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Authorization,Content-Type,Origin,X-Requested-With",
     "Access-Control-Allow-Methods": "GET, POST, DELETE, PUT"
   });
-
-  res.send('{"status":"logged in"}');
 });
 
-app.options('/api/v1/login', function(req, res) {
+app.post('/api/v1/register', function(req, res) {
+  //get user register data
+  var username = req.body[0].value;
+  var password = req.body[1].value
+  var playerName = req.body[2].value
+  createPlayer(username, password, playerName)
 
-  console.log("options")
-
+  //enable Access-Control-Allow-Origin
   res.set({
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Authorization,Content-Type,Origin,X-Requested-With",
     "Access-Control-Allow-Methods": "GET, POST, DELETE, PUT"
   });
+});
 
-  res.send('{"status":"logged in"}');
+app.post('/api/v1/joinGame', function(req, res) {
+  //get user game id and the player
+  var gameId= req.body[0];
+  //add player to a game
+  joinGame(id,player)
+
+  //enable Access-Control-Allow-Origin
+  res.set({
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Authorization,Content-Type,Origin,X-Requested-With",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, PUT"
+  });
 });
 
 app.post('/api/v1/play', function(req, res) {
@@ -67,5 +88,3 @@ app.post('/api/v1/play', function(req, res) {
 
   res.send('{"status":"recieved event"}');
 });
-
-app.listen("8000")

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="socket.io/socket.io.js"></script>
+  <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script>
+    window.onload = function() {
+      var isConnected = false;
+      var socket = io.connect();
+      socket.on('connect', function() {
+      })
+      //when you click on the li, get the first character which is the id of the game
+      $('li a').on('click', function() {
+          //send the data as POST
+          //make json of id of the game, and the player from the html name field
+          var JsonInt = {id:parseInt($(this).text().split(" ")[0])),player:$(name).text()}
+          //send this json to the server, to add this player to the selected game
+          $.ajax({
+            crossOrigin: true,
+            type: "POST",
+            url: "http://localhost:8000/api/v1/joinGame",
+            data: JsonInt,
+            success: function(data) {
+              //change this html or move to the game html
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+              alert("Status: " + textStatus);
+              alert("Error: " + errorThrown);
+            },
+            crossDomain: true,
+            dataType: 'json',
+            contentType: "application/json",
+          });
+        }
+      })
+      //when you click on create game, emit a create game event
+      $('.createGame').on('click', function() {
+        socket.emit('createGame')
+      })
+      //when recieve into game event, change route or change page to the game
+      socket.on('into game', function(data) {
+
+      })
+      //when recieve creating game event, go to create game route or into the game
+      socket.on('creating game', function(data) {
+
+      })
+    }
+  </script>
+  <!-- <script type="text/javascript" src="js/jquery.ajax-cross-origin.min.js"></script> -->
+  <title>
+    <%= title %>
+  </title>
+  <script>
+  </script>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+  <h1><%= title %></h1>
+  <div id="games">
+    <% if(gameDetails){ %>
+      <ol id="activeGames">
+        <% for(var i=0;i < gameDetails.length; i++){%>
+          <li>
+            <a>
+              <% gameDetails[i].id %> , players -
+                <% gameDetails[i].players %>
+            </a>
+          </li>
+          <% } %>
+      </ol>
+      <% } else {%>
+        <button id='createGame'>Create Game!</button>
+        <% } %>
+          <button id='createGame'>Create Game!</button>
+
+  </div>
+</body>
+
+</html>

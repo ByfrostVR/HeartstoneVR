@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('babylondptp:server');
 var http = require('http');
+var sio = require("socket.io");
 
 /**
  * Get port from environment and store in Express.
@@ -20,12 +21,27 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+var io = sio.listen(server)
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-
-server.listen(port);
+ io.sockets.on('connection', function(socket) {
+   console.log('socket has connected' + ' ' + socket.id);
+   socket.on('logged in', function(){
+     //send post to server?
+     //idk
+   })
+   socket.on('gameSelected',function(id){
+     //update game to full and move the client to the game room
+     //socket.emit('into game', game route)?
+   })
+   socket.on('createGame', function(){
+     //socket.emit('creating game', create game route\ new game route)
+     //update active games in the server, add one
+   })
+ })
+server.listen(app.get('port'));
 server.on('error', onError);
 server.on('listening', onListening);
 
