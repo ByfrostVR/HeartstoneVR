@@ -4,7 +4,7 @@ var router = express.Router();
 /* GET login page. */
 router.get('/', function(req, res, next) {
   //from the views folder
-  res.render('login', { title: 'Login' });
+  res.render('index', { title: 'Login' });
 });
 
 module.exports = router;

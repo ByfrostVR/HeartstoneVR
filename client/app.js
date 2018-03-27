@@ -1,4 +1,5 @@
 var express = require('express');
+//var cors = require('cors')
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -10,6 +11,7 @@ var users = require('./routes/users');
 var scene = require('./routes/scene.js')
 
 var app = express();
+//app.use(cors())
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,7 +26,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+/*
 //enable Access-Control-Allow-Origin
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -32,7 +34,7 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,X-Auth-Token");
   next();
 });
-
+*/
 app.use('/', index);
 app.use('/users', users);
 app.use('/scene', scene);
