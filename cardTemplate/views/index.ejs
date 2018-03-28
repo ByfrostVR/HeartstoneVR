@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <link rel="icon" type="image/png" href="http://example.com/myicon.png">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Babylon Template</title>
+
+  <style>
+    html,
+    body {
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #renderCanvas {
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+  </style>
+
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://code.jquery.com/pep/0.4.1/pep.js"></script>
+
+</head>
+
+<body>
+
+  <canvas id="renderCanvas" touch-action="none"></canvas> //touch-action="none" for best results from PEP
+
+  <script>
+    //simple babylonjs scene. we need to put the gameScene here instead.
+
+    var canvas = document.getElementById("renderCanvas"); // Get the canvas element
+
+    var engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+
+
+    /******* Add the create scene function ******/
+    var createScene = function() {
+
+      // Create the scene space
+      var scene = new BABYLON.Scene(engine);
+
+      // Add a camera to the scene and attach it to the canvas
+      var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 4, 2, BABYLON.Vector3.Zero(), scene);
+      camera.attachControl(canvas, true);
+
+      // Add lights to the scene
+      var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
+      var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), scene);
+
+
+      var f = new BABYLON.Vector4(0.5, 0, 1, 1); // front image = half the whole image along the width
+      var b = new BABYLON.Vector4(0, 0, 0.5, 1); // back image = second half along the width
+
+      var plane = BABYLON.MeshBuilder.CreatePlane("plane", {
+        height: 1,
+        width: 1,
+        sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+        frontUVs: f,
+        backUVs: b
+      }, scene);
+
+      var mat = new BABYLON.StandardMaterial("", scene);
+      mat.diffuseTexture = new BABYLON.Texture("https://i.imgur.com/ntIgFT6.jpg", scene);
+      plane.material = mat;
+      var texturePlane = new BABYLON.DynamicTexture("dynamic texture", 900, scene);
+      var textureContext = texturePlane.getContext();
+
+      var materialPlane = new BABYLON.StandardMaterial("Mat", scene);
+      //materialPlane.diffuseTexture = new BABYLON.Texture('images/card-back-default.png',scene);
+      plane.material.diffuseTexture = texturePlane;
+
+
+
+      var img = new Image();
+      img.src = 'images/card-back-default.png';
+      img.onload = function() {
+        //Add image to dynamic texture
+        textureContext.drawImage(this, 0, 100);
+        texturePlane.update();
+
+        //Add text to dynamic texture
+        var font = "bold 44px monospace";
+        texturePlane.drawText("Name", 620, 500, font, "White", null, true, true);
+        texturePlane.drawText("attack", 460, 850, font, "White", null, true, true);
+        texturePlane.drawText("Health", 720, 850, font, "White", null, true, true);
+        texturePlane.drawText("Descrition", 530, 700, font, "White", null, true, true);
+        texturePlane.drawText("Cost", 460, 100, font, "White", null, true, true);
+
+
+
+
+      }
+
+      return scene;
+    };
+
+    /******* End of the create scene function ******/
+
+    var scene = createScene(); //Call the createScene function
+
+    engine.runRenderLoop(function() { // Register a render loop to repeatedly render the scene
+      scene.render();
+    });
+
+
+    window.addEventListener("resize", function() { // Watch for browser/canvas resize events
+      engine.resize();
+    });
+  </script>
+
+</body>
+
+</html>
