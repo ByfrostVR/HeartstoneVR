@@ -1,12 +1,19 @@
 var mongoose = require("mongoose")
 
-var ObjectId = mongoose.SchemaTypes.ObjectId;
+mongoose.connect("mongodb://localhost/players");
+
+mongoose.Promise = global.Promise;
+//Get the default connection
+var db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
 //game schema
 //the player value needs to be list of players
 var gameSchema = new mongoose.Schema({
   players: [Number],
   available: Boolean,
-  id: Number
+  roomName: String
 })
 //join game method, which takes player and add it to the player array
 gameSchema.method('joinGame', function(player) {
@@ -26,6 +33,4 @@ this.set('available', 'true');
 })
 
 //game model
-var Game = mongoose.model("Game", gameSchema);
-
-module.export = Game;
+module.exports = mongoose.model("games", gameSchema);

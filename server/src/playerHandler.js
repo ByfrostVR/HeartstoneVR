@@ -1,8 +1,8 @@
 module.exports = {
   //create player according to registration data
 
-  createPlayer: function(username, password, playerName, playerSchema) {
-    playerSchema.create({
+  createPlayer: function(username, password, playerName, player) {
+    player.create({
       username: username,
       password: password,
       playerName: playerName,

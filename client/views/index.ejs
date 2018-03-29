@@ -22,15 +22,22 @@
         url: "http://localhost:8000/api/v1/login",
         data: formData,
         success: function(data) {
-          //data = JSON.stringify(data)
+          //get the value of the object
           data = data.text
+          //parse the object into JSON
           data = JSON.parse(data)
           alert("worked " +  data.status)
+          //if the user does exist, change its route to the homePage.
+          //if no, stay in the login
           if (data.status == "logged in") {
-            var temp = "scene";
+            var temp = "homePage";
             url = "http://localhost:3000/" + temp;
             window.location.replace(url);
             //socket.emit('logged in')
+          }else{
+            var temp = "login";
+            url = "http://localhost:3000/" + temp;
+            window.location.replace(url);
           }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {

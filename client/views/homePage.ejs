@@ -6,33 +6,93 @@
   <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <script>
     window.onload = function() {
+      //get all existing games and display them as a list
+      $.ajax({
+        crossOrigin: true,
+        type: "POST",
+        url: "http://localhost:8000/api/v1/getGames",
+        success: function(gList) {
+          //get the value of the object which is a list of game names
+          gList = gList.text
+          //if the is games, create a list
+          if (gList) {
+            //create list object
+            var ObjUl = $('<ul></ul>');
+            //if the list contain more than one object, use for each
+            //otherwise just add on element
+            if (gList.length > 1) {
+              //for each game add a element
+              $.each(gList, function(i) {
+                //create empty element
+                var Objli = $('<li></li>')
+                var Obja = $('<a></a>')
+                //properties of the elements
+                ObjUl.addClass('ui-menu-item')
+                ObjUl.attr("role", "menuitem")
+                Obja.addClass("ui-all");
+                Obja.attr("tabindex", "-1")
+
+                //the content of the element
+                Obja.text(gList[i])
+                //create the element
+                Objli.append(Obja)
+                ObjUl.append(Objli)
+              })
+              //display all the elements in the games div
+              $('.games').append(ObjUl);
+            } else {
+              var Objli = $('<li></li>')
+              var Obja = $('<a></a>')
+              ObjUl.addClass('ui-menu-item')
+              ObjUl.attr("role", "menuitem")
+
+              Obja.addClass("ui-all");
+              Obja.attr("tabindex", "-1")
+              Obja.text(gList)
+
+              Objli.append(Obja)
+
+              ObjUl.append(Objli)
+              $('.games').append(ObjUl);
+            }
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          alert("Status: " + textStatus);
+          alert("Error: " + errorThrown);
+        },
+        crossDomain: true,
+        dataType: 'json',
+        contentType: "application/json",
+      });
       var isConnected = false;
       var socket = io.connect();
-      socket.on('connect', function() {
-      })
       //when you click on the li, get the first character which is the id of the game
       $('li a').on('click', function() {
-          //send the data as POST
-          //make json of id of the game, and the player from the html name field
-          var JsonInt = {id:parseInt($(this).text().split(" ")[0])),player:$(name).text()}
-          //send this json to the server, to add this player to the selected game
-          $.ajax({
-            crossOrigin: true,
-            type: "POST",
-            url: "http://localhost:8000/api/v1/joinGame",
-            data: JsonInt,
-            success: function(data) {
-              //change this html or move to the game html
-            },
-            error: function(XMLHttpRequest, textStatus, errorThrown) {
-              alert("Status: " + textStatus);
-              alert("Error: " + errorThrown);
-            },
-            crossDomain: true,
-            dataType: 'json',
-            contentType: "application/json",
-          });
+        //send the data as POST
+        //make json of id of the game, and the player from the html name field
+        var chosenRoom = {
+          roomName: $(this).text()
         }
+
+
+        //send this json to the server, to add this player to the selected game
+        $.ajax({
+          crossOrigin: true,
+          type: "POST",
+          url: "http://localhost:8000/api/v1/joinGame",
+          data: chosenRoom,
+          success: function(data) {
+            //change this html or move to the game html
+          },
+          error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+          },
+          crossDomain: true,
+          dataType: 'json',
+          contentType: "application/json",
+        });
       })
       //when you click on create game, emit a create game event
       $('.createGame').on('click', function() {
@@ -59,22 +119,7 @@
 
 <body>
   <h1><%= title %></h1>
-  <div id="games">
-    <% if(gameDetails){ %>
-      <ol id="activeGames">
-        <% for(var i=0;i < gameDetails.length; i++){%>
-          <li>
-            <a>
-              <% gameDetails[i].id %> , players -
-                <% gameDetails[i].players %>
-            </a>
-          </li>
-          <% } %>
-      </ol>
-      <% } else {%>
-        <button id='createGame'>Create Game!</button>
-        <% } %>
-          <button id='createGame'>Create Game!</button>
+  <div class="games">
 
   </div>
 </body>
