@@ -1,11 +1,18 @@
+var Player = require('./Player');
 var player = require('./playerHandler.js')
 var game = require('./gameHandler.js')
 var cors = require('cors')
 var express = require("express")
 var app = express()
 
-var Player = require('./Player');
+var mongoose = require("mongoose")
+//var collections = mongoose.connections[0].collections['players']['collection'];
+//var names = []
 
+// Object.keys(collections).forEach(function(k){
+//   names.push(k)
+// })
+//console.log(names);
 app.use(cors())
 
 var issue2options = {
@@ -30,9 +37,9 @@ app.use(bodyParser.urlencoded({
 // parameters sent with
 
 app.post('/api/v1/login', cors(issue2options), function(req, res) {
-  var username = req.query.username;
+  var username = req.body[0].value;
   //var firend_id = req.body.friend;
-  var password = req.query.password;
+  var password = req.body[1].value;
 
   //enable Access-Control-Allow-Origin
   // res.set({
@@ -42,16 +49,23 @@ app.post('/api/v1/login', cors(issue2options), function(req, res) {
   //   "Access-Control-Allow-Methods": "GET, POST, DELETE, PUT"
   // });
   //authentication
-  console.log(player.findPlayer(username, password, Player));
-  if (player.findPlayer(username, password, Player) == true) {
-    res.json({
-      text: '{status:"logged in"}'
-    });
-  } else {
-    res.json({
-      text: '{status:"logged in"}'
-    });
-  }
+  player.findPlayer(username, password, Player, function(err, found) {
+    console.log(found);
+    console.log("here");
+    if (err) {
+      console.log("error - " + err);
+    } else if (found) {
+      console.log("yay");
+      res.json({
+        text: '{"status":"logged in"}'
+      });
+    } else {
+      console.log("fku");
+      res.json({
+        text: '{"status":"failedToLog"}'
+      });
+    }
+  });
 });
 
 app.post('/api/v1/register', function(req, res) {

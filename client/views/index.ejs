@@ -22,7 +22,10 @@
         url: "http://localhost:8000/api/v1/login",
         data: formData,
         success: function(data) {
-          setInterval(function(){ alert("success"); }, 3000);
+          //data = JSON.stringify(data)
+          data = data.text
+          data = JSON.parse(data)
+          alert("worked " +  data.status)
           if (data.status == "logged in") {
             var temp = "scene";
             url = "http://localhost:3000/" + temp;
@@ -31,7 +34,6 @@
           }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
-          setInterval(function(){ alert("error"); }, 3000);
           window.location.replace("http://localhost:3000/")
 
         },

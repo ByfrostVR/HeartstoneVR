@@ -1,5 +1,5 @@
 module.exports = {
-//create player according to registration data
+  //create player according to registration data
 
   createPlayer: function(username, password, playerName, playerSchema) {
     playerSchema.create({
@@ -20,18 +20,17 @@ module.exports = {
   },
 
   //find player function for authorization
-  findPlayer: function(username, password, player) {
-    console.log(username + ' ' + password);
-    var bool = false
+  findPlayer: function(username, password, player, found) {
+
     player.find({
+      'password': password
     }, function(err, p) {
       if (err || p.length == 0) {
-        console.log(err);
-        bool = false
+        found(null,false);
       } else {
-        bool = true
+        console.log("je");
+        found(null,true);
       }
     });
-    return bool
   }
 }

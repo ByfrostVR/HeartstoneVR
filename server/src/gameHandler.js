@@ -1,6 +1,6 @@
 var mongoose = require("mongoose")
 
-mongoose.connect("mongodb://localhost/heartstone")
+//mongoose.connect("mongodb://localhost/heartstone")
 
 var Game = require('./Game');
 var Player = require('./Player');

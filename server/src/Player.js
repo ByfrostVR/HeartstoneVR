@@ -1,5 +1,6 @@
 var mongoose = require("mongoose")
 
+// mongoose.connect("mongodb://localhost/players");
 mongoose.connect("mongodb://localhost/players");
 
 mongoose.Promise = global.Promise;
@@ -20,4 +21,4 @@ var playerSchema = new mongoose.Schema({
 })
 //player model
 
-module.exports = mongoose.model("Player", playerSchema);
+module.exports = mongoose.model("players", playerSchema);

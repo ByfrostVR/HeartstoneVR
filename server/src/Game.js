@@ -2,8 +2,9 @@ var mongoose = require("mongoose")
 
 var ObjectId = mongoose.SchemaTypes.ObjectId;
 //game schema
+//the player value needs to be list of players
 var gameSchema = new mongoose.Schema({
-  players: [{type: ObjectId, ref: Player}],
+  players: [Number],
   available: Boolean,
   id: Number
 })
