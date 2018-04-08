@@ -4,18 +4,40 @@ var game = require('./gameHandler.js')
 var Game = require('./Game.js')
 var cors = require('cors')
 var express = require("express")
+var io = require("socket.io")();
+var port = 8000;
 var app = express()
+var server = app.listen(port, function() {
+  console.log("The server is on. Listen on port 8000");
+})
+var io = require('socket.io').listen(server);
 
-var mongoose = require("mongoose")
+//var mongoose = require("mongoose")
 //var collections = mongoose.connections[0].collections['players']['collection'];
 //var names = []
 
 // Object.keys(collections).forEach(function(k){
 //   names.push(k)
 // })
-//console.log(names);
-//game.createGame(Game,'a2')
+//console.log(names);null
+//game.createGame(Game,'gameNumber1',function(err,a){console.log(a);})
+//game.createGame(Game,'gameNumber2',function(err,a){console.log(a);})
+// Game.find({
+//   'roomName': 'gameNumber1'
+// },function(err,g){
+//   //  console.log(Game.schema
+//   console.log(g[0].joinGame());
+// })
+//player.createPlayer('yotam','fromm','DeathGunter',Player)
 app.use(cors())
+
+var rand = function() {
+  return Math.random().toString(36).substr(2); // remove `0.`
+};
+
+var tokenGenerator = function() {
+  return rand() + rand(); // to make it longer
+};
 
 var issue2options = {
   origin: true,
@@ -38,6 +60,15 @@ app.use(bodyParser.urlencoded({
 // POST http://localhost:8080/api/users
 // parameters sent with
 
+
+
+io.on('connection', function(socket){
+  socket.on('hi',function(data){
+    console.log(data);
+    socket.emit('hi', 'hello!')
+  })
+})
+
 app.post('/api/v1/login', cors(issue2options), function(req, res) {
   var username = req.body[0].value;
   //var firend_id = req.body.friend;
@@ -55,8 +86,9 @@ app.post('/api/v1/login', cors(issue2options), function(req, res) {
     if (err) {
       console.log("error - " + err);
     } else if (found) {
+      var token = tokenGenerator()
       res.json({
-        text: '{"status":"logged in"}'
+        text: '{"status":"logged in","token":"' + token + '"}'
       });
     } else {
       res.json({
@@ -66,6 +98,9 @@ app.post('/api/v1/login', cors(issue2options), function(req, res) {
   });
 });
 
+app.post('/api/v1/sayHi',cors(),function(req,res){
+  req.app.io.emit('hi',{msg: 'well hello there!'})
+})
 app.post('/api/v1/register', cors(), function(req, res) {
   //get user register data
   var username = req.body[0].value;
@@ -77,34 +112,72 @@ app.post('/api/v1/register', cors(), function(req, res) {
 });
 app.post('/api/v1/joinGame', cors(issue2options), function(req, res) {
   //get user game id and the player
-  var gameId = req.body[0].value;
-  console.log(gameId);
+  //console.log(req.body.roomName);
+  roomName = req.body.roomName;
   //add player to a game
-  //game.joinGame(id,player)
-
-  //enable Access-Control-Allow-Origin
-  res.json(gameId)
+  game.joinGame(Game, roomName, function(err, answer) {
+    if (err) {
+      console.log(err);
+    } else if (answer == 'added') {
+      res.json({
+        text: '{"status":"joined the game"}'
+      })
+    } else {
+      console.log(answer);
+      res.json({
+        text: '{"status":"failed to join"}'
+      })
+    }
+  })
+});
+app.post('/api/v1/exitGame', cors(issue2options), function(req, res) {
+  //get user game id and the player
+  //console.log(req.body.roomName);
+  var roomName = req.body.roomName;
+  //add player to a game
+  game.exitGame(Game, roomName, function(err, answer) {
+    if (err) {
+      console.log(err);
+    } else if (answer == 'exit') {
+      res.json('{"status":"exited the game"}')
+    } else {
+      console.log(answer);
+      res.json('{"status":"failed to exit"}')
+    }
+  })
 });
 app.post('/api/v1/getGames', cors(issue2options), function(req, res) {
-  game.getAllGames(Game, function(err, found){
+  game.getAllGames(Game, function(err, found) {
     if (err) {
       console.log("error - " + err);
-    }else if(found){
-      res.json({text: found})
+    } else if (found) {
+      res.json({
+        text: found
+      })
     }
   });
 });
-app.post('/api/v1/joinGame', cors(), function(req, res) {
+app.post('/api/v1/createGame', cors(issue2options), function(req, res) {
   //get user game id and the player
-  var gameId = req.body[0].value;
-  console.log(gameId);
-  //add player to a game
-  //game.joinGame(id,player)
+  //console.log(req);
+  var roomName = req.body[0].value;
+  if (roomName == '' || roomName == undefined || roomName == null) {
+    res.json('{"status":"failed to create"}')
+  } else {
+    //add player to a game
+    game.createGame(Game, roomName, function(err, answer) {
+      if (err) {
+        console.log(err);
+      } else if (answer == 'created') {
+        console.log('good');
+        res.json('{"status":"created the game"}')
+        res.end();
+      } else {
+        console.log('bad');
+        res.json('{"status":"failed to create"}')
+        res.end();
+      }
 
-  //enable Access-Control-Allow-Origin
-  res.send(gameId)
+    })
+  }
 });
-
-app.listen(8000, function() {
-  console.log("The server is on. Listen on port 8000");
-})

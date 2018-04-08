@@ -1,6 +1,6 @@
 var mongoose = require("mongoose")
 
-mongoose.connect("mongodb://localhost/players");
+mongoose.connect("mongodb://localhost:32768/heartstone");
 
 mongoose.Promise = global.Promise;
 //Get the default connection
@@ -11,26 +11,63 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 //game schema
 //the player value needs to be list of players
 var gameSchema = new mongoose.Schema({
-  players: [Number],
+  players: Number,
   available: Boolean,
   roomName: String
 })
-//join game method, which takes player and add it to the player array
-gameSchema.method('joinGame', function(player) {
-  if (this.players.length >= 0 && this.players.length <= 1) {
-    this.players.push(player);
-  }
-  //if it is the last player, change the game availablity to false
-  if (this.players.length == 2) {
-    this.set('available', 'false')
-  }
 
-})
-//exit game method, which remove player from the game
-gameSchema.method('exitGame', function(player) {
-remove(this.players, player);
-this.set('available', 'true');
+gameSchema.method('echo', function() {
+  //remove(this.players, player);
+  console.log("ay");
 })
 
+gameSchema.method('joinGame', function(success) {
+  if (this.players == 0) {
+    this.set({
+      players: this.players + 1
+    })
+    this.save(function(err, updated) {
+      if (err) {
+        console.log('err -' + err);
+      } else {
+        console.log(updated);
+      }
+    })
+
+    console.log('added player');
+    return success(null, 'added')
+
+  } else if (this.players == 1) {
+    this.set({
+      players: this.players + 1,
+      available: false
+
+    })
+    this.save(function(err, updated) {
+      if (err) {
+        console.log('err -' + err);
+      } else {
+        console.log(updated);
+      }
+    })
+
+    console.log('added player');
+    return success(null, 'added')
+  } else if (this.players >= 2) {
+    return success(null, 'full')
+  } else {
+    return success(null, 'something went wrong')
+
+  }
+})
+gameSchema.method('exitGame', function(success) {
+  this.set({
+    players: this.players - 1
+  })
+  this.save(function(err, updated) {
+    if (err) return success(err, null);
+  })
+  return success(null, 'exit')
+})
 //game model
 module.exports = mongoose.model("games", gameSchema);

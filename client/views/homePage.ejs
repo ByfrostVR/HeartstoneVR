@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <script src="socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.dev.js"></script>
   <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <script>
     window.onload = function() {
@@ -26,16 +26,13 @@
                 //create empty element
                 var Objli = $('<li></li>')
                 var Obja = $('<a></a>')
-                //properties of the elements
-                ObjUl.addClass('ui-menu-item')
-                ObjUl.attr("role", "menuitem")
-                Obja.addClass("ui-all");
-                Obja.attr("tabindex", "-1")
-
-                //the content of the element
+                $(Objli).attr('id', i + 1);
+                ObjUl.addClass('gameList')
+                Obja.addClass("specificGame");
                 Obja.text(gList[i])
-                //create the element
+
                 Objli.append(Obja)
+
                 ObjUl.append(Objli)
               })
               //display all the elements in the games div
@@ -43,11 +40,9 @@
             } else {
               var Objli = $('<li></li>')
               var Obja = $('<a></a>')
-              ObjUl.addClass('ui-menu-item')
-              ObjUl.attr("role", "menuitem")
+              ObjUl.addClass('gameList')
 
-              Obja.addClass("ui-all");
-              Obja.attr("tabindex", "-1")
+              Obja.addClass("specificGame");
               Obja.text(gList)
 
               Objli.append(Obja)
@@ -65,47 +60,85 @@
         dataType: 'json',
         contentType: "application/json",
       });
-      var isConnected = false;
-      var socket = io.connect();
-      //when you click on the li, get the first character which is the id of the game
-      $('li a').on('click', function() {
-        //send the data as POST
-        //make json of id of the game, and the player from the html name field
-        var chosenRoom = {
-          roomName: $(this).text()
-        }
 
+      $(function() {
+        $(document).ready(function() {
+          $(".gameList li a").click(function() {
+            alert('clicked')
+            var gameName = $(this).text()
+            var room = {
+              roomName: $(this).text()
+            };
+            room = JSON.stringify(room);
+            $.ajax({
+              crossOrigin: true,
+              type: "POST",
+              url: "http://localhost:8000/api/v1/joinGame",
+              data: room,
+              success: function(data) {
+                alert('s1')
+                $.ajax({
+                  type: "GET",
+                  url: "http://localhost:3000/games/" + gameName,
+                  success: function(dataGet) {
+                    alert('s2')
+                    url = "http://localhost:3000/games/" + gameName
+                    alert(url)
+                    window.location.replace(url)
+                  },
+                  error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    alert(errorThrown)
+                  }
+                })
+              },
+              //change this html or move to the game html
 
-        //send this json to the server, to add this player to the selected game
-        $.ajax({
-          crossOrigin: true,
-          type: "POST",
-          url: "http://localhost:8000/api/v1/joinGame",
-          data: chosenRoom,
-          success: function(data) {
-            //change this html or move to the game html
-          },
-          error: function(XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
-          },
-          crossDomain: true,
-          dataType: 'json',
-          contentType: "application/json",
+              error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert("Status: " + textStatus);
+                alert("Error: " + errorThrown);
+              },
+              crossDomain: true,
+              dataType: 'json',
+              contentType: "application/json",
+            });
+          });
         });
+      });
+
+      var socket = io.connect();
+      socket.emit('hi','Hi!');
+      socket.on('hi',function(data){
+        alert(data)
       })
+      //when you click on the li, get the first character which is the id of the game
+
+      //send the data as POST
+      //make json of id of the game, and the player from the html name field
+      //   var chosenRoom = {
+      //     roomName: $(this).text()
+      //   }
+      //
+      //
+      //   //send this json to the server, to add this player to the selected game
+      //   $.ajax({
+      //     crossOrigin: true,
+      //     type: "POST",
+      //     url: "http://localhost:8000/api/v1/joinGame",
+      //     data: chosenRoom,
+      //     success: function(data) {
+      //       //change this html or move to the game html
+      //     },
+      //     error: function(XMLHttpRequest, textStatus, errorThrown) {
+      //       alert("Status: " + textStatus);
+      //       alert("Error: " + errorThrown);
+      //     },
+      //     crossDomain: true,
+      //     dataType: 'json',
+      //     contentType: "application/json",
+      //   });
+      // })
       //when you click on create game, emit a create game event
-      $('.createGame').on('click', function() {
-        socket.emit('createGame')
-      })
       //when recieve into game event, change route or change page to the game
-      socket.on('into game', function(data) {
-
-      })
-      //when recieve creating game event, go to create game route or into the game
-      socket.on('creating game', function(data) {
-
-      })
     }
   </script>
   <!-- <script type="text/javascript" src="js/jquery.ajax-cross-origin.min.js"></script> -->
@@ -113,15 +146,21 @@
     <%= title %>
   </title>
   <script>
+    function creation() {
+      var temp = "createGame";
+      url = "http://localhost:3000/" + temp;
+      window.location.replace(url);
+    }
   </script>
   <link rel='stylesheet' href='/stylesheets/style.css' />
 </head>
 
 <body>
+  <script></script>
   <h1><%= title %></h1>
   <div class="games">
-
   </div>
+  <button onclick="creation()">create game</button>
 </body>
 
 </html>

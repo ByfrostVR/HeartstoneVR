@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <!-- <script type="text/javascript" src="js/jquery.ajax-cross-origin.min.js"></script> -->
+  <title>
+    <%= title %>
+  </title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+  <script>
+    function sendData() {
+      //get the data from the form and alter it to json file
+      var formData = JSON.stringify($("#gameCreate").serializeArray());
+      var gameName = $("#gameCreate").serializeArray()[0].value
+      alert(formData);
+
+      //send the data as POST
+      $.ajax({
+        crossOrigin: true,
+        type: "POST",
+        url: "http://localhost:8000/api/v1/createGame",
+        data: formData,
+        success: function(data) {
+          //get the value of the object
+          //parse the object into JSON
+          data = JSON.parse(data)
+          console.log(data);
+          console.log(data.status);
+          //if the user does exist, change its route to the homePage.
+          //if no, stay in the login
+          if (data.status == "created the game") {
+            url = "http://localhost:3000/games/" + gameName;
+            window.location.replace(url);
+          } else {
+            alert('something went wrong')
+            var temp = "homePage";
+            url = "http://localhost:3000/" + temp;
+            window.location.replace(url);
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          alert("Status: " + textStatus);
+          alert("Error: " + errorThrown);
+          window.location.replace("http://localhost:3000/homePage")
+
+        },
+        crossDomain: true,
+        dataType: 'json',
+        contentType: "application/json"
+      });
+    }
+  </script>
+  <h1><%= title %></h1>
+  <form id="gameCreate" onsubmit="sendData()">
+    <label>Game Name - </label>
+    <input type="txt" name="gameName" placeholder="Name Of The Game">
+    <input type="submit" value="Create">
+  </form>
+</body>
+
+</html>

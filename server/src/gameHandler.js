@@ -1,38 +1,61 @@
-var id = 1;
-
 function remove(array, element) {
   const index = array.indexOf(element);
   array.splice(index, 1);
 }
 //create game according to the request
 module.exports = {
-  createGame: function(game, roomName) {
+  createGame: function(game, rn, returnAnswer) {
     //the function needs to get a player
-    console.log(roomName);
     game.create({
+      players: 0,
       available: true,
-      'roomName': roomName
-    }, function(err, p) {
-      if (err) {
-        console.log("SOMETHING WENT WRONG");
-        console.log(err);
-      } else {
-        console.log("Saved!!");
-      }
-    })
-    id++;
-  },
-
-  joinGame: function(id, player, game) {
-    Game.find({
-      id: id,
+      'roomName': rn
     }, function(err, g) {
       if (err) {
-        console.log(err);
+        returnAnswer(err, null)
       } else {
-        g.joinGame(player)
+        g.joinGame(function(err, answer) {
+          if (answer == 'added') {
+            returnAnswer(null, 'created')
+          } else {
+            returnAnswer(null, 'the room is full')
+          }
+        })
+
       }
-    });
+    })
+  },
+  joinGame: function(game, rn, returnAnswer) {
+    game.findOne({
+      'roomName': rn
+    }, function(err, foundGame) {
+      if (err) {
+        console.log('error - ' + err);
+      } else if (foundGame.length != 0) {
+        foundGame.joinGame(returnAnswer, function(err, answer) {
+          if (err) {
+            returnAnswer(err, null)
+          } else {
+            returnAnswer(null, answer)
+          }
+        })
+      } else {
+        returnAnswer(null, 'not found')
+      }
+    })
+  },
+  exitGame: function(game, rn, returnAnswer) {
+    game.findOne({
+      'roomName': rn
+    }, function(err, foundGame) {
+      foundGame.exitGame(returnAnswer, function(err, answer) {
+        if (err) {
+          returnAnswer(err, null)
+        } else {
+          returnAnswer(null, answer)
+        }
+      })
+    })
   },
   getAllGames: function(game, found) {
     results = [];
@@ -41,15 +64,15 @@ module.exports = {
     }, function(err, games) {
       if (err) {
         console.log("o no - " + err);
-        found(err, null)
+        return found(err, null)
       } else if (games.length > 0) {
         games.forEach(function(game) {
           results.push(game.roomName)
         })
-        found(null, results)
+        return found(null, results)
       } else {
         console.log(games);
-        found(null, null)
+        return found(null, null)
       }
     })
 

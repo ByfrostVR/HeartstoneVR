@@ -11,6 +11,39 @@
     // var io = require("socket.io");
     // var socket = io.connect();
     // socket.on('connect', function() {})
+    function setCookie(token, tempId, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      var expires = "expires=" + d.toGMTString();
+      document.cookie = token + "=" + tempId + ";" + expires + ";path=/";
+    }
+
+    function getCookie(token) {
+      var id = token + "=";
+      var decodedCookie = decodeURIComponent(document.cookie);
+      var ca = decodedCookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(id.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function checkCookie() {
+      var user = getCookie("token");
+      if (user != "") {
+        alert("Welcome again");
+        var temp = "homePage";
+        url = "http://localhost:3000/" + temp;
+        window.location.replace(url);
+      }
+    }
+
     //send the login data to the main server for authentication
     function sendData() {
       //get the data from the form and alter it to json file
@@ -26,15 +59,15 @@
           data = data.text
           //parse the object into JSON
           data = JSON.parse(data)
-          alert("worked " +  data.status)
           //if the user does exist, change its route to the homePage.
           //if no, stay in the login
           if (data.status == "logged in") {
+            setCookie('token',data.token,0.05)
             var temp = "homePage";
             url = "http://localhost:3000/" + temp;
             window.location.replace(url);
             //socket.emit('logged in')
-          }else{
+          } else {
             var temp = "login";
             url = "http://localhost:3000/" + temp;
             window.location.replace(url);
@@ -53,7 +86,7 @@
   <link rel='stylesheet' href='/stylesheets/style.css' />
 </head>
 
-<body>
+<body onload="checkCookie()">
   <h1><%= title %></h1>
   <form id="myform" onsubmit="sendData()">
     <label>name -</label>

@@ -1,7 +1,6 @@
 var mongoose = require("mongoose")
 
-// mongoose.connect("mongodb://localhost/players");
-mongoose.connect("mongodb://localhost/players");
+mongoose.connect("mongodb://localhost:32768/heartstone");
 
 mongoose.Promise = global.Promise;
 //Get the default connection
