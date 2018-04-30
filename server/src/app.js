@@ -4,14 +4,91 @@ var game = require('./gameHandler.js')
 var Game = require('./Game.js')
 var cors = require('cors')
 var express = require("express")
-var io = require("socket.io")();
 var port = 8000;
 var app = express()
 var server = app.listen(port, function() {
   console.log("The server is on. Listen on port 8000");
 })
 var io = require('socket.io').listen(server);
+var roomQueue = [];
+var roomQueueFull = [];
+var counterRooms = 0;
+//key:value  --> key:client , value:room's client
+var usersConnected = {};
 
+
+io.on('connection', function (socket) {
+    console.log("Client " + socket.id + " connected");
+    socket.on('start', function (playerData) {
+        counterRooms += 1;
+        roomName = "room" + counterRooms;
+        usersConnected[socket.id] = roomName;
+
+        if (roomQueue[0]) {
+            var room = roomQueue.shift();
+            var clientsInRoom = io.sockets.adapter.rooms[room];
+            if (clientsInRoom.length == 1) {
+                roomQueueFull.push(room);
+            }
+            usersConnected[socket.id] = room;
+            socket.join(room);
+            socket.broadcast.to(room).emit('handshake1', playerData);
+        } else {
+            roomQueue.push(usersConnected[socket.id]);
+            socket.join(roomName);
+        }
+    });
+
+    socket.on('handshake2', function (playerData) {
+        socket.broadcast.to(usersConnected[socket.id]).emit('handshake3', playerData);
+        var coords = [];
+        var i;
+        for (i = 0; i < 50; i++) {
+            var c = {
+                x: Math.floor(Math.random() * 1001) - 500,
+                y: 2.5,
+                z: Math.floor(Math.random() * 1001) - 500
+            }
+            coords.push(c);
+        }
+        socket.broadcast.to(usersConnected[socket.id]).emit('setSpheres', coords);
+        coords.forEach(function (coord) {
+            coord.x = -coord.x;
+            coord.z = -coord.z;
+        });
+        socket.emit('setSpheres', coords);
+    });
+
+    socket.on('sendUpdate', function (data) {
+        socket.broadcast.to(usersConnected[socket.id]).emit('receiveUpdate', data);
+    });
+
+    socket.on('hit', function (idSphere) {
+        socket.broadcast.to(usersConnected[socket.id]).emit('spherePicked', idSphere);
+    });
+
+    socket.on('gameOver', function () {
+        socket.disconnect();
+    });
+
+    socket.on('disconnect', function () {
+        console.log("Client " + socket.id + " disconnected");
+        var roomClientRemoved = usersConnected[socket.id];
+        delete usersConnected[socket.id];
+
+        var index = roomQueueFull.indexOf(roomClientRemoved);
+        if (index > -1) {
+            roomQueueFull.splice(index, 1);
+            roomQueue.push(roomClientRemoved);
+        } else {
+            index = roomQueue.indexOf(roomClientRemoved)
+            if (index > -1) {
+                roomQueue.splice(index, 1)
+            }
+        }
+        socket.broadcast.to(roomClientRemoved).emit('bye', "");
+    });
+});
 //var mongoose = require("mongoose")
 //var collections = mongoose.connections[0].collections['players']['collection'];
 //var names = []
@@ -22,6 +99,7 @@ var io = require('socket.io').listen(server);
 //console.log(names);null
 //game.createGame(Game,'gameNumber1',function(err,a){console.log(a);})
 //game.createGame(Game,'gameNumber2',function(err,a){console.log(a);})
+//player.createPlayer('yotam','fromm','DeathGunter',Player)
 // Game.find({
 //   'roomName': 'gameNumber1'
 // },function(err,g){
@@ -147,6 +225,7 @@ app.post('/api/v1/exitGame', cors(issue2options), function(req, res) {
   })
 });
 app.post('/api/v1/getGames', cors(issue2options), function(req, res) {
+  console.log("here");
   game.getAllGames(Game, function(err, found) {
     if (err) {
       console.log("error - " + err);

@@ -1,7 +1,8 @@
 import styles from './index.css';
 import * as BABYLON from 'babylonjs';
 import * as GUI from "babylonjs-gui";
-
+import * as client from "./client.js"
+import * as utility from "./utility.js"
 import hand from './hand.js';
 import * as Leap from 'leapjs';
 import * as Play from 'leapjs-playback';
@@ -161,9 +162,23 @@ window.addEventListener('DOMContentLoaded', function() {
   scene.registerBeforeRender(function() {
     castRayAndSelectObject();
   });
-  creations.engine.runRenderLoop(function() {
-    scene.render();
-  });
+  function startBabylonEngine() {
+    if (BABYLON.Engine.isSupported()) {
+        var scene = createMultiplayerScene();
+        engine.displayLoadingUI();
+        scene.executeWhenReady(function () {
+            engine.runRenderLoop(function () {
+                engine.hideLoadingUI();
+                scene.render();
+            });
+        });
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    } else {
+        alert("I'm sorry!");
+    }
+};
 
   //scene.debugLayer.show()
 });

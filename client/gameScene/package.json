@@ -27,6 +27,6 @@
   },
   "scripts": {
     "build": "webpack --env build",
-    "start": "webpack-dev-server --env dev --content-base build --devtool source-map"
+    "start": "webpack-dev-server --env dev --content-base build --devtool source-map --host 0.0.0.0"    
   }
 }

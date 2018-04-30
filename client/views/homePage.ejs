@@ -3,9 +3,46 @@
 
 <head>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.dev.js"></script>
+  <title>HeartstoneVR</title>
+  <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
   <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <script>
-    window.onload = function() {
+    function setCookie(token, tempId, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      var expires = "expires=" + d.toGMTString();
+      document.cookie = token + "=" + tempId + ";" + expires + ";path=/";
+    }
+
+    function getCookie(token) {
+      var id = token + "=";
+      var decodedCookie = decodeURIComponent(document.cookie);
+      var ca = decodedCookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(id.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function checkCookie() {
+      var user = getCookie("token");
+      if (user == "") {
+        var temp = "index";
+        url = "http://localhost:3000/" + temp;
+        window.location.replace(url);
+        alert("You Are Not Signed In!");
+      }
+    }
+    var gettingGames = function() {
       //get all existing games and display them as a list
       $.ajax({
         crossOrigin: true,
@@ -76,14 +113,11 @@
               url: "http://localhost:8000/api/v1/joinGame",
               data: room,
               success: function(data) {
-                alert('s1')
                 $.ajax({
                   type: "GET",
                   url: "http://localhost:3000/games/" + gameName,
                   success: function(dataGet) {
-                    alert('s2')
                     url = "http://localhost:3000/games/" + gameName
-                    alert(url)
                     window.location.replace(url)
                   },
                   error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -106,39 +140,15 @@
       });
 
       var socket = io.connect();
-      socket.emit('hi','Hi!');
-      socket.on('hi',function(data){
+      socket.emit('hi', 'Hi!');
+      socket.on('hi', function(data) {
         alert(data)
       })
-      //when you click on the li, get the first character which is the id of the game
+    }
 
-      //send the data as POST
-      //make json of id of the game, and the player from the html name field
-      //   var chosenRoom = {
-      //     roomName: $(this).text()
-      //   }
-      //
-      //
-      //   //send this json to the server, to add this player to the selected game
-      //   $.ajax({
-      //     crossOrigin: true,
-      //     type: "POST",
-      //     url: "http://localhost:8000/api/v1/joinGame",
-      //     data: chosenRoom,
-      //     success: function(data) {
-      //       //change this html or move to the game html
-      //     },
-      //     error: function(XMLHttpRequest, textStatus, errorThrown) {
-      //       alert("Status: " + textStatus);
-      //       alert("Error: " + errorThrown);
-      //     },
-      //     crossDomain: true,
-      //     dataType: 'json',
-      //     contentType: "application/json",
-      //   });
-      // })
-      //when you click on create game, emit a create game event
-      //when recieve into game event, change route or change page to the game
+    function start() {
+      checkCookie()
+      gettingGames()
     }
   </script>
   <!-- <script type="text/javascript" src="js/jquery.ajax-cross-origin.min.js"></script> -->
@@ -155,8 +165,36 @@
   <link rel='stylesheet' href='/stylesheets/style.css' />
 </head>
 
-<body>
-  <script></script>
+<body onload="start()">
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+        <a class="navbar-brand" href="./homePage.ejs">HeartstoneVR</a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="./homePage">Home</a></li>
+          <li><a href="./contact">Contact</a></li>
+        </ul>
+        </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="./createGame">Create Game<span class="sr-only">(current)</span></a></li>
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container-fluid -->
+  </nav>
   <h1><%= title %></h1>
   <div class="games">
   </div>

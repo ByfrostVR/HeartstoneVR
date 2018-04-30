@@ -3,6 +3,9 @@
 
 <head>
   <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
   <!-- <script type="text/javascript" src="js/jquery.ajax-cross-origin.min.js"></script> -->
   <title>
     <%= title %>
@@ -12,6 +15,39 @@
 
 <body>
   <script>
+    function setCookie(token, tempId, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      var expires = "expires=" + d.toGMTString();
+      document.cookie = token + "=" + tempId + ";" + expires + ";path=/";
+    }
+
+    function getCookie(token) {
+      var id = token + "=";
+      var decodedCookie = decodeURIComponent(document.cookie);
+      var ca = decodedCookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(id.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function checkCookie() {
+      var user = getCookie("token");
+      if (user == "") {
+        var temp = "index";
+        url = "http://localhost:3000/" + temp;
+        window.location.replace(url);
+        alert("You Are Not Signed In!");
+      }
+    }
+
     function sendData() {
       //get the data from the form and alter it to json file
       var formData = JSON.stringify($("#gameCreate").serializeArray());
@@ -54,12 +90,44 @@
       });
     }
   </script>
-  <h1><%= title %></h1>
-  <form id="gameCreate" onsubmit="sendData()">
-    <label>Game Name - </label>
-    <input type="txt" name="gameName" placeholder="Name Of The Game">
-    <input type="submit" value="Create">
-  </form>
-</body>
+  </head>
+
+  <body onload="checkCookie()">
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+          <a class="navbar-brand" href="#">HearthstoneVR</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="./homePage">Home</a></li>
+            <li><a href="./contact">Contact</a></li>
+          </ul>
+          </li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="active"><a href="./createGame">Create Game<span class="sr-only">(current)</span></a></li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container-fluid -->
+    </nav>
+    <form id="gameCreate" onsubmit="sendData()">
+      <div class="form-group">
+        <label>Game Name - </label>
+        <input type="txt" name="gameName" placeholder="Name Of The Game">
+        <input type="submit" value="Create">
+    </form>
+  </body>
 
 </html>

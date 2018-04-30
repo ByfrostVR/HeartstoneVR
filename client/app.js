@@ -11,6 +11,7 @@ var users = require('./routes/users');
 var scene = require('./routes/scene.js')
 var homePage = require('./routes/homePage.js')
 var createGame = require('./routes/createGame.js')
+var gameScene = require('./routes/gameScene.js')
 
 var app = express();
 //app.use(cors())
@@ -20,7 +21,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -40,11 +40,10 @@ app.use(function(req, res, next) {
 app.use('/', index);
 app.use('/users', users);
 app.use('/scene', scene);
+//app.use('/gameScene',gameScene)
 app.use('/homePage', homePage)
 app.use('/createGame', createGame)
-app.get('/games/:gameName', function(req, res, next) {
-  res.render('../views/scene.ejs', { title: 'Scene' });
-});
+app.get('/games/:gameName', gameScene);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

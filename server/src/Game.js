@@ -1,8 +1,7 @@
 var mongoose = require("mongoose")
 
-mongoose.connect("mongodb://localhost:32768/heartstone");
-
-mongoose.Promise = global.Promise;
+mongoose.connect("mongodb://localhost:27017/heartstone")// if error it will throw async error
+//mongoose.Promise = global.Promise;
 //Get the default connection
 var db = mongoose.connection;
 
