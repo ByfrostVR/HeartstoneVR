@@ -20,43 +20,7 @@ var usersConnected = {};
 io.on('connection', function (socket) {
     console.log("Client " + socket.id + " connected");
     socket.on('start', function (playerData) {
-        counterRooms += 1;
-        roomName = "room" + counterRooms;
-        usersConnected[socket.id] = roomName;
-
-        if (roomQueue[0]) {
-            var room = roomQueue.shift();
-            var clientsInRoom = io.sockets.adapter.rooms[room];
-            if (clientsInRoom.length == 1) {
-                roomQueueFull.push(room);
-            }
-            usersConnected[socket.id] = room;
-            socket.join(room);
-            socket.broadcast.to(room).emit('handshake1', playerData);
-        } else {
-            roomQueue.push(usersConnected[socket.id]);
-            socket.join(roomName);
-        }
-    });
-
-    socket.on('handshake2', function (playerData) {
-        socket.broadcast.to(usersConnected[socket.id]).emit('handshake3', playerData);
-        var coords = [];
-        var i;
-        for (i = 0; i < 50; i++) {
-            var c = {
-                x: Math.floor(Math.random() * 1001) - 500,
-                y: 2.5,
-                z: Math.floor(Math.random() * 1001) - 500
-            }
-            coords.push(c);
-        }
-        socket.broadcast.to(usersConnected[socket.id]).emit('setSpheres', coords);
-        coords.forEach(function (coord) {
-            coord.x = -coord.x;
-            coord.z = -coord.z;
-        });
-        socket.emit('setSpheres', coords);
+        console.log('hello')
     });
 
     socket.on('sendUpdate', function (data) {
@@ -106,7 +70,7 @@ io.on('connection', function (socket) {
 //   //  console.log(Game.schema
 //   console.log(g[0].joinGame());
 // })
-//player.createPlayer('yotam','fromm','DeathGunter',Player)
+//player.createPlayer('test','test','Test',Player)
 app.use(cors())
 
 var rand = function() {

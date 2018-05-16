@@ -5,6 +5,7 @@ const build_path = path.resolve(__dirname, "build")
 const src_path = path.resolve(__dirname, "src")
 
 module.exports = {
+  watch: true,
   target: 'web',
   context: src_path,
   entry: {

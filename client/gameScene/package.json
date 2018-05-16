@@ -27,7 +27,7 @@
     "webpack-dev-server": "^2.9.4"
   },
   "scripts": {
-    "build": "webpack --env build",
+    "build": "webpack --env build  --watch --progress",
     "start": "webpack-dev-server --env dev --content-base build --devtool source-map --host 0.0.0.0"
   }
 }
