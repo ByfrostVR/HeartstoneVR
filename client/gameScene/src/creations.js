@@ -4,9 +4,9 @@ import * as GUI from "babylonjs-gui";
 import hand from './hand.js';
 import * as Leap from 'leapjs';
 
-export var scene, ground, selected, ray, camera, rightHand, leftHand, handbox, music, pastSelected;
-export var musicBox = [];
-var mouseOnly = false;
+export var scene, ground, selected, ray, camera, rightHand, leftHand, pastSelected;
+//export var musicBox = [];
+//var mouseOnly = false;
 var currentMeshSelected = null;
 var canvas = document.getElementById('canvas');
 export var engine = new BABYLON.Engine(canvas, true);
@@ -22,23 +22,23 @@ export function createScene() {
   //creating scene
   scene = new BABYLON.Scene(engine);
   //initializing music
-  music = new BABYLON.Sound("Music", "./assets/music/imTheOne.wav", scene)
+  // music = new BABYLON.Sound("Music", "./assets/music/imTheOne.wav", scene)
   //enabling phisics
-  scene.enablePhysics();
+  //scene.enablePhysics();
   //enable collisions
-  scene.collisionsEnabled = true;
+  //scene.collisionsEnabled = true;
   //creating camera
-  createCamera();
+  //createCamera();
   //creating light
-  createLight();
+  //createLight();
   //creating ground
-  createGround();
+  //createGround();
   //will be used in the future createCard();
 
   //creatng music box
-  createMusicBoxes();
+  //createMusicBoxes();
   //creating GUI
-  createGUI();
+  //createGUI();
   return scene;
 }
 

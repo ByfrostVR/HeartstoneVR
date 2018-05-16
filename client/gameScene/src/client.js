@@ -18,36 +18,15 @@ var socket;
 var playerHands = [];
 
 
-export function initSocket(scene.frame) {
+export function initSocket() {
   //document.getElementById("play").style.setProperty("visibility", "hidden");
   //document.getElementById("play").style.visibility = "hidden";
   alert('init socket2')
   socket = io('http://localhost:8000').connect();
   socket.on('connect', function() {
-    scene.startBabylonEngine(); //on index.js
-    playerHands.push(scene.leftHand)
-    playerHands.push(scene.rightHand)
-    var playerData = {
-      frame: scene.frame
-    }
-    socket.emit('start', playerData);
+    socket.emit('start');
   });
 
-  socket.on('handshake1', function(data) {
-    if (player2) {
-      player2.dispose();
-    }
-    player2 = createUpdateHand(scene, data, 2);
-
-    var playerData = {
-      frame: player1.frame
-    }
-    socket.emit('handshake2', playerData);
-  });
-
-  socket.on('handshake3', function(data) {
-    player2 = createPlayer(scene, data);
-  });
   socket.on('receiveUpdate', function(data) {
     createUpdateHand(data)
   })

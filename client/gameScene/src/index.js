@@ -28,9 +28,6 @@ import {
 */
 import * as creations from './creations.js';
 
-var scene;
-var engine;
-
 export function startBabylonEngine() {
   console.log("what what2?");
   if (BABYLON.Engine.isSupported()) {
@@ -49,9 +46,10 @@ export function startBabylonEngine() {
   }
 };
 window.addEventListener('DOMContentLoaded', function() {
-  scene = creations.createScene();
-  engine = creations.engine;
+  var scene = creations.createScene();
   console.log("what what3?");
+  var engine = creations.engine;
+
   client.initSocket()
   var rightHand, leftHand, currentMeshSelected, pastSelected, frame;
   var selected = false;
@@ -122,7 +120,7 @@ window.addEventListener('DOMContentLoaded', function() {
       currentMeshSelected.material = myMaterial;
     }
   }
-  BABYLON.Engine.audioEngine.setGlobalVolume(0.5);
+//  BABYLON.Engine.audioEngine.setGlobalVolume(0.5);
   Leap.Controller.plugin('playback', Play.playback);
   Leap.Controller.plugin('handEntry', handEntry.handEntry)
   Leap.Controller.plugin('handSwipe', handSwipe.handSwipe)
