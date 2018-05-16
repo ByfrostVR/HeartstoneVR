@@ -16,4 +16,7 @@ We want to create full game experience by implementing Heartstone into virtual r
 ### Currently we managed to:
  - integrate Leapmotion with BabylonsJS
  - create a simple event handling server
- 
+### How can you donate?
+ - check our issues
+ - pick your favorite issue(there is some enjoyable issues...)
+ - leave a message or contact us about anything!
