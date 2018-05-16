@@ -4,7 +4,7 @@
   "description": "server for the heartstone game",
   "main": "app.js",
   "scripts": {
-    "watch": "nodemon src/app.js"
+    "start": "nodemon src/app.js"
   },
   "author": "",
   "license": "ISC",
