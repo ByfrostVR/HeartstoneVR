@@ -11,90 +11,51 @@ var toDelete = [];
 var enemyScore = 0;
 var playerScore = 0;
 */
-
+//import * as creations from './creations.js';
+import io from 'socket.io-client';
+import * as scene from './index.js'
 var socket;
-//var playerColor;
+var playerHands = [];
 
 
-function initSocket() {
-    //document.getElementById("play").style.setProperty("visibility", "hidden");
-    document.getElementById("play").style.visibility = "hidden";
-    socket = null;
-    socket = io('http://localhost:8000').connect();
-    socket.on('connect', function () {
-        //playerColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
-        startBabylonEngine(); //on baylonMultiplayer.js
-        var playerData = {
-            x: player1.position.x,
-            y: player1.position.y,
-            z: player1.position.z,
-            color: playerColor
-        }
-        socket.emit('start', playerData);
-    });
+export function initSocket(scene.frame) {
+  //document.getElementById("play").style.setProperty("visibility", "hidden");
+  //document.getElementById("play").style.visibility = "hidden";
+  alert('init socket2')
+  socket = io('http://localhost:8000').connect();
+  socket.on('connect', function() {
+    scene.startBabylonEngine(); //on index.js
+    playerHands.push(scene.leftHand)
+    playerHands.push(scene.rightHand)
+    var playerData = {
+      frame: scene.frame
+    }
+    socket.emit('start', playerData);
+  });
 
-    socket.on('handshake1', function (data) {
-        if (player2) {
-            player2.dispose();
-        }
-        player2 = createPlayer(scene, data.color, data);
+  socket.on('handshake1', function(data) {
+    if (player2) {
+      player2.dispose();
+    }
+    player2 = createUpdateHand(scene, data, 2);
 
-        var playerData = {
-            x: player1.position.x,
-            y: player1.position.y,
-            z: player1.position.z,
-            color: playerColor
-        }
-        socket.emit('handshake2', playerData);
-    });
+    var playerData = {
+      frame: player1.frame
+    }
+    socket.emit('handshake2', playerData);
+  });
 
-    socket.on('handshake3', function (data) {
-        player2 = createPlayer(scene, data.color, data);
-    });
+  socket.on('handshake3', function(data) {
+    player2 = createPlayer(scene, data);
+  });
+  socket.on('receiveUpdate', function(data) {
+    createUpdateHand(data)
+  })
 
-    socket.on('setSpheres', function (coord) {
-        setSpheres(coord);
-    });
-
-    socket.on('receiveUpdate', function (data) {
-        player2.position.x = data.x;
-        player2.position.y = data.y;
-        player2.position.z = data.z;
-
-        if (data.left) {
-            player2.rotation.y -= 0.01;
-        } else if (data.right) {
-            player2.rotation.y += 0.01;
-        }
-
-        player2.position.x -= Math.cos(player2.rotation.y) * data.speed;
-        player2.position.z += Math.sin(player2.rotation.y) * data.speed;
-
-    });
-
-    socket.on('spherePicked', function (sphereID) {
-        var spherePicked = scene.getMeshByID(sphereID);
-        if (spherePicked) {
-            spherePicked.dispose();
-        }
-        enemyScore += 1;
-        document.getElementById("enemyScore").textContent = "Enemy : " + enemyScore + "/25";
-        if (enemyScore > 24) {
-            gameOver("LOOSE");
-        }
-    });
-
-    socket.on('bye', function (data) {
-        if (player2) {
-            player2.dispose()
-        }
-        for (i = 0; i < spheres.length; i++) {
-            spheres[i].dispose();
-        }
-        playerScore = 0;
-        enemyScore = 0;
-        document.getElementById("playerScore").textContent = "You : " + playerScore + "/25";
-        document.getElementById("enemyScore").textContent = "Enemy : " + enemyScore + "/25";
-    });
+  socket.on('bye', function(data) {
+    if (player2) {
+      player2.dispose()
+    }
+  });
 
 }

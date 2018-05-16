@@ -17,7 +17,8 @@ var inherits = require('util').inherits,
   createClientInfo = require('./shared').createClientInfo,
   SessionMixins = require('./shared').SessionMixins,
   isRetryableWritesSupported = require('./shared').isRetryableWritesSupported,
-  getNextTransactionNumber = require('./shared').getNextTransactionNumber;
+  getNextTransactionNumber = require('./shared').getNextTransactionNumber,
+  relayEvents = require('./shared').relayEvents;
 
 var MongoCR = require('../auth/mongocr'),
   X509 = require('../auth/x509'),
@@ -98,6 +99,7 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {number} [options.pingInterval=5000] Ping interval to check the response time to the different servers
  * @param {number} [options.localThresholdMS=15] Cutoff latency point in MS for Replicaset member selection
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
+ * @param {boolean} [options.monitorCommands=false] Enable command monitoring for this topology
  * @return {ReplSet} A cursor instance
  * @fires ReplSet#connect
  * @fires ReplSet#ha
@@ -402,15 +404,13 @@ function connectNewServers(self, servers, callback) {
       server.once('parseError', _handleEvent(self, 'parseError'));
 
       // SDAM Monitoring events
-      server.on('serverOpening', function(e) {
-        self.emit('serverOpening', e);
-      });
-      server.on('serverDescriptionChanged', function(e) {
-        self.emit('serverDescriptionChanged', e);
-      });
-      server.on('serverClosed', function(e) {
-        self.emit('serverClosed', e);
-      });
+      server.on('serverOpening', e => self.emit('serverOpening', e));
+      server.on('serverDescriptionChanged', e => self.emit('serverDescriptionChanged', e));
+      server.on('serverClosed', e => self.emit('serverClosed', e));
+
+      // Command Monitoring events
+      relayEvents(server, self, ['commandStarted', 'commandSucceeded', 'commandFailed']);
+
       server.connect(self.s.connectOptions);
     }, i);
   }
@@ -934,16 +934,15 @@ function connectServers(self, servers) {
       server.once('parseError', handleInitialConnectEvent(self, 'parseError'));
       server.once('error', handleInitialConnectEvent(self, 'error'));
       server.once('connect', handleInitialConnectEvent(self, 'connect'));
+
       // SDAM Monitoring events
-      server.on('serverOpening', function(e) {
-        self.emit('serverOpening', e);
-      });
-      server.on('serverDescriptionChanged', function(e) {
-        self.emit('serverDescriptionChanged', e);
-      });
-      server.on('serverClosed', function(e) {
-        self.emit('serverClosed', e);
-      });
+      server.on('serverOpening', e => self.emit('serverOpening', e));
+      server.on('serverDescriptionChanged', e => self.emit('serverDescriptionChanged', e));
+      server.on('serverClosed', e => self.emit('serverClosed', e));
+
+      // Command Monitoring events
+      relayEvents(server, self, ['commandStarted', 'commandSucceeded', 'commandFailed']);
+
       // Start connection
       server.connect(self.s.connectOptions);
     }, timeoutInterval);
@@ -1218,7 +1217,9 @@ function executeWriteOperation(args, options, callback) {
     }
 
     // Per SDAM, remove primary from replicaset
-    self.s.replicaSetState.remove(self.s.replicaSetState.primary, { force: true });
+    if (self.s.replicaSetState.primary) {
+      self.s.replicaSetState.remove(self.s.replicaSetState.primary, { force: true });
+    }
 
     return callback(err);
   };
@@ -1381,7 +1382,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
 
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
-  if (self.s.disconnectHandler != null) {
+  if (!this.isConnected() && self.s.disconnectHandler != null) {
     if (!self.s.replicaSetState.hasPrimary() && !self.s.options.secondaryOnlyConnectionAllowed) {
       return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
     } else if (
@@ -1668,6 +1669,27 @@ ReplSet.prototype.cursor = function(ns, cmd, options) {
  * A topology serverHeartbeatSucceeded SDAM change event
  *
  * @event ReplSet#serverHeartbeatSucceeded
+ * @type {object}
+ */
+
+/**
+ * An event emitted indicating a command was started, if command monitoring is enabled
+ *
+ * @event ReplSet#commandStarted
+ * @type {object}
+ */
+
+/**
+ * An event emitted indicating a command succeeded, if command monitoring is enabled
+ *
+ * @event ReplSet#commandSucceeded
+ * @type {object}
+ */
+
+/**
+ * An event emitted indicating a command failed, if command monitoring is enabled
+ *
+ * @event ReplSet#commandFailed
  * @type {object}
  */
 

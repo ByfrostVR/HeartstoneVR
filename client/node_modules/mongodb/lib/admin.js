@@ -1,9 +1,9 @@
 'use strict';
 
-var toError = require('./utils').toError,
-  Define = require('./metadata'),
-  shallowClone = require('./utils').shallowClone,
-  executeOperation = require('./utils').executeOperation;
+const toError = require('./utils').toError;
+const shallowClone = require('./utils').shallowClone;
+const executeOperation = require('./utils').executeOperation;
+const applyWriteConcern = require('./utils').applyWriteConcern;
 
 /**
  * @fileOverview The **Admin** class is an internal class that allows convenient access to
@@ -48,8 +48,6 @@ var Admin = function(db, topology, promiseLibrary) {
   };
 };
 
-var define = (Admin.define = new Define('Admin', Admin, false));
-
 /**
  * The callback format for results
  * @callback Admin~resultCallback
@@ -79,8 +77,6 @@ Admin.prototype.command = function(command, options, callback) {
   ]);
 };
 
-define.classMethod('command', { callback: true, promise: true });
-
 /**
  * Retrieve the server information for the current
  * instance of the db client
@@ -102,8 +98,6 @@ Admin.prototype.buildInfo = function(options, callback) {
   ]);
 };
 
-define.classMethod('buildInfo', { callback: true, promise: true });
-
 /**
  * Retrieve the server information for the current
  * instance of the db client
@@ -124,8 +118,6 @@ Admin.prototype.serverInfo = function(options, callback) {
     callback
   ]);
 };
-
-define.classMethod('serverInfo', { callback: true, promise: true });
 
 /**
  * Retrieve this db's server status.
@@ -153,8 +145,6 @@ var serverStatus = function(self, options, callback) {
   });
 };
 
-define.classMethod('serverStatus', { callback: true, promise: true });
-
 /**
  * Ping the MongoDB server and retrieve results
  *
@@ -173,29 +163,6 @@ Admin.prototype.ping = function(options, callback) {
     options,
     callback
   ]);
-};
-
-define.classMethod('ping', { callback: true, promise: true });
-
-// Get write concern
-var writeConcern = function(options, db) {
-  options = shallowClone(options);
-
-  // If options already contain write concerns return it
-  if (options.w || options.wtimeout || options.j || options.fsync) {
-    return options;
-  }
-
-  // Set db write concern if available
-  if (db.writeConcern) {
-    if (options.w) options.w = db.writeConcern.w;
-    if (options.wtimeout) options.wtimeout = db.writeConcern.wtimeout;
-    if (options.j) options.j = db.writeConcern.j;
-    if (options.fsync) options.fsync = db.writeConcern.fsync;
-  }
-
-  // Return modified options
-  return options;
 };
 
 /**
@@ -222,7 +189,7 @@ Admin.prototype.addUser = function(username, password, options, callback) {
   options = args.length ? args.shift() : {};
   options = options || {};
   // Get the options
-  options = writeConcern(options, self.s.db);
+  options = applyWriteConcern(shallowClone(options), { db: self.s.db });
   // Set the db name to admin
   options.dbName = 'admin';
 
@@ -233,8 +200,6 @@ Admin.prototype.addUser = function(username, password, options, callback) {
     callback
   ]);
 };
-
-define.classMethod('addUser', { callback: true, promise: true });
 
 /**
  * Remove a user from a database
@@ -257,7 +222,7 @@ Admin.prototype.removeUser = function(username, options, callback) {
   options = args.length ? args.shift() : {};
   options = options || {};
   // Get the options
-  options = writeConcern(options, self.s.db);
+  options = applyWriteConcern(shallowClone(options), { db: self.s.db });
   // Set the db name
   options.dbName = 'admin';
 
@@ -267,8 +232,6 @@ Admin.prototype.removeUser = function(username, options, callback) {
     callback
   ]);
 };
-
-define.classMethod('removeUser', { callback: true, promise: true });
 
 /**
  * Validate an existing collection
@@ -317,8 +280,6 @@ var validateCollection = function(self, collectionName, options, callback) {
   });
 };
 
-define.classMethod('validateCollection', { callback: true, promise: true });
-
 /**
  * List the available databases
  *
@@ -340,8 +301,6 @@ Admin.prototype.listDatabases = function(options, callback) {
     callback
   ]);
 };
-
-define.classMethod('listDatabases', { callback: true, promise: true });
 
 /**
  * Get ReplicaSet status
@@ -365,7 +324,5 @@ var replSetGetStatus = function(self, options, callback) {
     callback(toError(doc), false);
   });
 };
-
-define.classMethod('replSetGetStatus', { callback: true, promise: true });
 
 module.exports = Admin;

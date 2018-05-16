@@ -1,18 +1,18 @@
 'use strict';
 
-var common = require('./common'),
-  utils = require('../utils'),
-  toError = require('../utils').toError,
-  handleCallback = require('../utils').handleCallback,
-  shallowClone = utils.shallowClone,
-  BulkWriteResult = common.BulkWriteResult,
-  ObjectID = require('mongodb-core').BSON.ObjectID,
-  Define = require('../metadata'),
-  BSON = require('mongodb-core').BSON,
-  Batch = common.Batch,
-  mergeBatchResults = common.mergeBatchResults,
-  executeOperation = require('../utils').executeOperation,
-  BulkWriteError = require('./common').BulkWriteError;
+const common = require('./common');
+const utils = require('../utils');
+const toError = require('../utils').toError;
+const handleCallback = require('../utils').handleCallback;
+const shallowClone = utils.shallowClone;
+const BulkWriteResult = common.BulkWriteResult;
+const ObjectID = require('mongodb-core').BSON.ObjectID;
+const BSON = require('mongodb-core').BSON;
+const Batch = common.Batch;
+const mergeBatchResults = common.mergeBatchResults;
+const executeOperation = utils.executeOperation;
+const BulkWriteError = require('./common').BulkWriteError;
+const applyWriteConcern = utils.applyWriteConcern;
 
 var bson = new BSON([
   BSON.Binary,
@@ -247,7 +247,8 @@ function OrderedBulkOperation(topology, collection, options) {
       : 1000;
 
   // Get the write concern
-  var writeConcern = common.writeConcern(shallowClone(options), collection, options);
+  var writeConcern = applyWriteConcern(shallowClone(options), { collection: collection }, options);
+  writeConcern = writeConcern.writeConcern;
 
   // Get the promiseLibrary
   var promiseLibrary = options.promiseLibrary || Promise;
@@ -308,12 +309,6 @@ function OrderedBulkOperation(topology, collection, options) {
     checkKeys: typeof options.checkKeys === 'boolean' ? options.checkKeys : true
   };
 }
-
-var define = (OrderedBulkOperation.define = new Define(
-  'OrderedBulkOperation',
-  OrderedBulkOperation,
-  false
-));
 
 OrderedBulkOperation.prototype.raw = function(op) {
   var key = Object.keys(op)[0];
@@ -601,8 +596,6 @@ OrderedBulkOperation.prototype.execute = function(_writeConcern, options, callba
 
   return executeOperation(this.s.topology, executeCommands, [this, options, callback]);
 };
-
-define.classMethod('execute', { callback: true, promise: false });
 
 /**
  * Returns an unordered batch object

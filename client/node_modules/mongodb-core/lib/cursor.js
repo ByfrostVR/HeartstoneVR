@@ -171,6 +171,27 @@ Cursor.prototype.cursorSkip = function() {
   return this.cursorState.skip;
 };
 
+Cursor.prototype._endSession = function(options, callback) {
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  }
+  options = options || {};
+
+  const session = this.cursorState.session;
+
+  if (session && (options.force || session.owner === this)) {
+    this.cursorState.session = undefined;
+    session.endSession(callback);
+    return true;
+  }
+
+  if (callback) {
+    callback();
+  }
+  return false;
+};
+
 //
 // Handle callback (including any exceptions thrown)
 var handleCallback = function(callback, err, result) {
@@ -332,29 +353,6 @@ Cursor.prototype._getmore = function(callback) {
   );
 };
 
-Cursor.prototype._killcursor = function(callback) {
-  // Set cursor to dead
-  this.cursorState.dead = true;
-  this.cursorState.killed = true;
-  // Remove documents
-  this.cursorState.documents = [];
-
-  // If no cursor id just return
-  if (
-    this.cursorState.cursorId == null ||
-    this.cursorState.cursorId.isZero() ||
-    this.cursorState.init === false
-  ) {
-    if (callback) callback(null, null);
-    return;
-  }
-
-  // Default pool
-  var pool = this.server.s.pool;
-  // Execute command
-  this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState, pool, callback);
-};
-
 /**
  * Clone the cursor
  * @method
@@ -445,7 +443,26 @@ Cursor.prototype.readBufferedDocuments = function(number) {
  * @param {resultCallback} callback A callback function
  */
 Cursor.prototype.kill = function(callback) {
-  this._killcursor(callback);
+  // Set cursor to dead
+  this.cursorState.dead = true;
+  this.cursorState.killed = true;
+  // Remove documents
+  this.cursorState.documents = [];
+
+  // If no cursor id just return
+  if (
+    this.cursorState.cursorId == null ||
+    this.cursorState.cursorId.isZero() ||
+    this.cursorState.init === false
+  ) {
+    if (callback) callback(null, null);
+    return;
+  }
+
+  // Default pool
+  var pool = this.server.s.pool;
+  // Execute command
+  this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState, pool, callback);
 };
 
 /**
@@ -475,15 +492,11 @@ Cursor.prototype.rewind = function() {
  */
 var isConnectionDead = function(self, callback) {
   if (self.pool && self.pool.isDestroyed()) {
-    self.cursorState.notified = true;
     self.cursorState.killed = true;
-    self.cursorState.documents = [];
-    self.cursorState.cursorIndex = 0;
-    callback(
-      new MongoNetworkError(
-        f('connection to host %s:%s was destroyed', self.pool.host, self.pool.port)
-      )
+    const err = new MongoNetworkError(
+      f('connection to host %s:%s was destroyed', self.pool.host, self.pool.port)
     );
+    _setCursorNotifiedImpl(self, () => callback(err));
     return true;
   }
 
@@ -496,11 +509,8 @@ var isConnectionDead = function(self, callback) {
 var isCursorDeadButNotkilled = function(self, callback) {
   // Cursor is dead but not marked killed, return null
   if (self.cursorState.dead && !self.cursorState.killed) {
-    self.cursorState.notified = true;
     self.cursorState.killed = true;
-    self.cursorState.documents = [];
-    self.cursorState.cursorIndex = 0;
-    handleCallback(callback, null, null);
+    setCursorNotified(self, callback);
     return true;
   }
 
@@ -524,10 +534,7 @@ var isCursorDeadAndKilled = function(self, callback) {
  */
 var isCursorKilled = function(self, callback) {
   if (self.cursorState.killed) {
-    self.cursorState.notified = true;
-    self.cursorState.documents = [];
-    self.cursorState.cursorIndex = 0;
-    handleCallback(callback, null, null);
+    setCursorNotified(self, callback);
     return true;
   }
 
@@ -539,20 +546,24 @@ var isCursorKilled = function(self, callback) {
  */
 var setCursorDeadAndNotified = function(self, callback) {
   self.cursorState.dead = true;
-  self.cursorState.notified = true;
-  self.cursorState.documents = [];
-  self.cursorState.cursorIndex = 0;
-  handleCallback(callback, null, null);
+  setCursorNotified(self, callback);
 };
 
 /**
  * Mark cursor as being notified
  */
 var setCursorNotified = function(self, callback) {
+  _setCursorNotifiedImpl(self, () => handleCallback(callback, null, null));
+};
+
+var _setCursorNotifiedImpl = function(self, callback) {
   self.cursorState.notified = true;
   self.cursorState.documents = [];
   self.cursorState.cursorIndex = 0;
-  handleCallback(callback, null, null);
+  if (self._endSession) {
+    return self._endSession(undefined, () => callback());
+  }
+  return callback();
 };
 
 var nextFunction = function(self, callback) {
@@ -654,6 +665,10 @@ var nextFunction = function(self, callback) {
     self._find(function(err) {
       if (err) return handleCallback(callback, err, null);
 
+      if (self.cursorState.cursorId && self.cursorState.cursorId.isZero() && self._endSession) {
+        self._endSession();
+      }
+
       if (
         self.cursorState.documents.length === 0 &&
         self.cursorState.cursorId &&
@@ -695,6 +710,10 @@ var nextFunction = function(self, callback) {
     // Execute the next get more
     self._getmore(function(err, doc, connection) {
       if (err) return handleCallback(callback, err);
+
+      if (self.cursorState.cursorId && self.cursorState.cursorId.isZero() && self._endSession) {
+        self._endSession();
+      }
 
       // Save the returned connection to ensure all getMore's fire over the same connection
       self.connection = connection;

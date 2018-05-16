@@ -15,7 +15,8 @@
     "babylonjs-inspector": "^3.1.0-beta6",
     "leapjs": "^0.6.4",
     "leapjs-gesture": "^0.1.3",
-    "leapjs-playback": "https://github.com/abraverm/leapjs-playback.git"
+    "leapjs-playback": "https://github.com/abraverm/leapjs-playback.git",
+    "socket.io-client": "^2.1.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^4.2.0",
@@ -27,6 +28,6 @@
   },
   "scripts": {
     "build": "webpack --env build",
-    "start": "webpack-dev-server --env dev --content-base build --devtool source-map --host 0.0.0.0"    
+    "start": "webpack-dev-server --env dev --content-base build --devtool source-map --host 0.0.0.0"
   }
 }

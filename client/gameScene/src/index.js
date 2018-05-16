@@ -1,12 +1,12 @@
 import styles from './index.css';
 import * as BABYLON from 'babylonjs';
 import * as GUI from "babylonjs-gui";
-import * as client from "./client.js"
 import * as utility from "./utility.js"
 import hand from './hand.js';
 import * as Leap from 'leapjs';
 import * as Play from 'leapjs-playback';
 import * as Inspector from 'babylonjs-inspector'
+import * as client from './client.js'
 // import * as LeapGesture from 'leapjs-gesture'
 import {
   handEntry,
@@ -26,11 +26,34 @@ import {
   castRayAndSelectObject
 }
 */
-import * as creations from './creations.js'
+import * as creations from './creations.js';
 
+var scene;
+var engine;
+
+export function startBabylonEngine() {
+  console.log("what what2?");
+  if (BABYLON.Engine.isSupported()) {
+    engine.displayLoadingUI();
+    scene.executeWhenReady(function() {
+      engine.runRenderLoop(function() {
+        engine.hideLoadingUI();
+        scene.render();
+      });
+    });
+    window.addEventListener("resize", function() {
+      engine.resize();
+    });
+  } else {
+    alert("I'm sorry!");
+  }
+};
 window.addEventListener('DOMContentLoaded', function() {
-  var scene = creations.createScene();
-  var rightHand,leftHand,currentMeshSelected,pastSelected;
+  scene = creations.createScene();
+  engine = creations.engine;
+  console.log("what what3?");
+  client.initSocket()
+  var rightHand, leftHand, currentMeshSelected, pastSelected, frame;
   var selected = false;
   var castRayAndSelectObject = function() {
     var ray;
@@ -81,17 +104,17 @@ window.addEventListener('DOMContentLoaded', function() {
   //check whether the player doing fist at the moment, and if he is, act due to where he is pointing at the moment
   var fist = function() {
     // if he is pointing at the ,musix box, play music
-    if (currentMeshSelected === creations.musicBox[0] && creations.music.isReady) {
-      creations.music.play()
-    }
-    //if he is pointing at the PauseBox, stop the music
-    if (currentMeshSelected === creations.musicBox[1]) {
-      if (creations.music.isPause) {
-        creations.music.Stop();
-      } else if (creations.music.isPlaying) {
-        creations.music.Pause()
-      }
-    }
+    // if (currentMeshSelected === creations.musicBox[0] && creations.music.isReady) {
+    //   creations.music.play()
+    // }
+    // //if he is pointing at the PauseBox, stop the music
+    // if (currentMeshSelected === creations.musicBox[1]) {
+    //   if (creations.music.isPause) {
+    //     creations.music.Stop();
+    //   } else if (creations.music.isPlaying) {
+    //     creations.music.Pause()
+    //   }
+    // }
     //if the mesh is definedm and its not the ray mesh or the ground mesh, change is color
     if (currentMeshSelected !== undefined && currentMeshSelected.name !== 'ray' && currentMeshSelected !== creations.ground) {
       var myMaterial = new BABYLON.StandardMaterial("myMaterial", scene);
@@ -122,63 +145,13 @@ window.addEventListener('DOMContentLoaded', function() {
   //.use('playback', {recording: '/assets/leap-record-1.json'})
   controller.connect();
   scene.registerBeforeRender(function() {
-    var frame = controller.frame();
-    if (frame.hands.length > 0) {
-      if (frame.hands[0] != undefined && frame.hands[0].type == "right") {
-        if (rightHand == undefined) {
-          rightHand = new hand(frame.hands[0].pointables, frame.hands[0].type, creations.camera);
-        } else {
-          rightHand.updateHand(frame.hands[0].pointables, frame.hands[0].type, creations.camera);
-        }
-        rightHand.drawHand(scene)
-        if (frame.hands[1] != undefined && frame.hands[1].type == "left") {
-          if (leftHand == undefined) {
-            leftHand = new hand(frame.hands[1].pointables, frame.hands[1].type, creations.camera);
-          } else {
-            leftHand.updateHand(frame.hands[1].pointables, frame.hands[1].type, creations.camera);
-          }
-          leftHand.drawHand(scene)
-        }
-      }
-      if (frame.hands[0] != undefined && frame.hands[0].type == "left") {
-        if (leftHand == undefined) {
-          leftHand = new hand(frame.hands[0].pointables, frame.hands[0].type, creations.camera);
-        } else {
-          leftHand.updateHand(frame.hands[0].pointables, frame.hands[0].type, creations.camera);
-        }
-        leftHand.drawHand(scene)
-        if (frame.hands[1] != undefined && frame.hands[1].type == "right") {
-          if (rightHand == undefined) {
-            rightHand = new hand(frame.hands[1].pointables, frame.hands[1].type, creations.camera);
-          } else {
-            rightHand.updateHand(frame.hands[1].pointables, frame.hands[1].type, creations.camera);
-          }
-          rightHand.drawHand(scene)
-        }
-      }
-    }
+    frame = controller.frame();
+    utility.createUpdateHand(scene, frame, 1);
   });
   //before rendering cast ray and select object
   scene.registerBeforeRender(function() {
     castRayAndSelectObject();
   });
-  function startBabylonEngine() {
-    if (BABYLON.Engine.isSupported()) {
-        var scene = createMultiplayerScene();
-        engine.displayLoadingUI();
-        scene.executeWhenReady(function () {
-            engine.runRenderLoop(function () {
-                engine.hideLoadingUI();
-                scene.render();
-            });
-        });
-        window.addEventListener("resize", function () {
-            engine.resize();
-        });
-    } else {
-        alert("I'm sorry!");
-    }
-};
 
   //scene.debugLayer.show()
 });

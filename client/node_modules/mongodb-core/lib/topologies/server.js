@@ -18,7 +18,8 @@ var inherits = require('util').inherits,
   createClientInfo = require('./shared').createClientInfo,
   createCompressionInfo = require('./shared').createCompressionInfo,
   resolveClusterTime = require('./shared').resolveClusterTime,
-  SessionMixins = require('./shared').SessionMixins;
+  SessionMixins = require('./shared').SessionMixins,
+  relayEvents = require('./shared').relayEvents;
 
 // Used for filtering out fields for loggin
 var debugFields = [
@@ -86,6 +87,7 @@ var BSON = retrieveBSON();
  * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @param {string} [options.appname=null] Application name, passed in on ismaster call and logged in mongod server logs. Maximum size 128 bytes.
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
+ * @param {boolean} [options.monitorCommands=false] Enable command monitoring for this topology
  * @return {Server} A cursor instance
  * @fires Server#connect
  * @fires Server#close
@@ -554,6 +556,9 @@ Server.prototype.connect = function(options) {
   self.s.pool.on('connect', eventHandler(self, 'connect'));
   self.s.pool.on('reconnect', eventHandler(self, 'reconnect'));
   self.s.pool.on('reconnectFailed', eventHandler(self, 'reconnectFailed'));
+
+  // Set up listeners for command monitoring
+  relayEvents(self.s.pool, self, ['commandStarted', 'commandSucceeded', 'commandFailed']);
 
   // Emit toplogy opening event if not in topology
   if (!self.s.inTopology) {
