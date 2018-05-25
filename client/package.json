@@ -12,9 +12,12 @@
     "debug": "~2.6.9",
     "ejs": "~2.5.7",
     "express": "~4.15.5",
+    "leapjs": "^0.6.4",
     "mongoose": "^5.0.11",
     "morgan": "~1.9.0",
+    "package.json": "^2.0.1",
     "serve-favicon": "~2.4.5",
-    "socket.io": "^2.1.0"
+    "socket.io": "^2.1.0",
+    "yarn.lock": "^0.0.1-security"
   }
 }

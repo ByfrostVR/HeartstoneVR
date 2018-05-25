@@ -10,66 +10,28 @@ var server = app.listen(port, function() {
   console.log("The server is on. Listen on port 8000");
 })
 var io = require('socket.io').listen(server);
-var roomQueue = [];
-var roomQueueFull = [];
-var counterRooms = 0;
-//key:value  --> key:client , value:room's client
-var usersConnected = {};
+var EventEmitter = require("events").EventEmitter;
+var ee = new EventEmitter();
 
-
-io.on('connection', function (socket) {
-    console.log("Client " + socket.id + " connected");
-    socket.on('start', function (playerData) {
-        console.log('hello')
-    });
-
-    socket.on('sendUpdate', function (data) {
-        socket.broadcast.to(usersConnected[socket.id]).emit('receiveUpdate', data);
-    });
-
-    socket.on('hit', function (idSphere) {
-        socket.broadcast.to(usersConnected[socket.id]).emit('spherePicked', idSphere);
-    });
-
-    socket.on('gameOver', function () {
-        socket.disconnect();
-    });
-
-    socket.on('disconnect', function () {
-        console.log("Client " + socket.id + " disconnected");
-        var roomClientRemoved = usersConnected[socket.id];
-        delete usersConnected[socket.id];
-
-        var index = roomQueueFull.indexOf(roomClientRemoved);
-        if (index > -1) {
-            roomQueueFull.splice(index, 1);
-            roomQueue.push(roomClientRemoved);
-        } else {
-            index = roomQueue.indexOf(roomClientRemoved)
-            if (index > -1) {
-                roomQueue.splice(index, 1)
-            }
-        }
-        socket.broadcast.to(roomClientRemoved).emit('bye', "");
-    });
-});
-//var mongoose = require("mongoose")
-//var collections = mongoose.connections[0].collections['players']['collection'];
-//var names = []
-
-// Object.keys(collections).forEach(function(k){
-//   names.push(k)
-// })
-//console.log(names);null
+io.on('connection', function(socket) {
+  console.log("Client " + socket.id + " connected");
+  socket.on('start', function(playerData) {
+    console.log('hello')
+  });
+  socket.on('circle', function() {
+    socket.broadcast.to(socket.id).emit('palmRay')
+  })
+  socket.on('meshSelected', function() {
+    console.log('about To Change color');
+    socket.broadcast.to(socket.id).emit('editMesh')
+  })
+  socket.on('disconnect', function() {
+    console.log("Client " + socket.id + " disconnected");
+  });
+})
 //game.createGame(Game,'gameNumber1',function(err,a){console.log(a);})
 //game.createGame(Game,'gameNumber2',function(err,a){console.log(a);})
 //player.createPlayer('yotam','fromm','DeathGunter',Player)
-// Game.find({
-//   'roomName': 'gameNumber1'
-// },function(err,g){
-//   //  console.log(Game.schema
-//   console.log(g[0].joinGame());
-// })
 //player.createPlayer('test','test','Test',Player)
 app.use(cors())
 
@@ -104,8 +66,8 @@ app.use(bodyParser.urlencoded({
 
 
 
-io.on('connection', function(socket){
-  socket.on('hi',function(data){
+io.on('connection', function(socket) {
+  socket.on('hi', function(data) {
     console.log(data);
     socket.emit('hi', 'hello!')
   })
@@ -140,8 +102,10 @@ app.post('/api/v1/login', cors(issue2options), function(req, res) {
   });
 });
 
-app.post('/api/v1/sayHi',cors(),function(req,res){
-  req.app.io.emit('hi',{msg: 'well hello there!'})
+app.post('/api/v1/sayHi', cors(), function(req, res) {
+  req.app.io.emit('hi', {
+    msg: 'well hello there!'
+  })
 })
 app.post('/api/v1/register', cors(), function(req, res) {
   //get user register data

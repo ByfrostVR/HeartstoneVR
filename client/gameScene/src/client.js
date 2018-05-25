@@ -11,30 +11,32 @@ var toDelete = [];
 var enemyScore = 0;
 var playerScore = 0;
 */
-//import * as creations from './creations.js';
 import io from 'socket.io-client';
 import * as scene from './index.js'
 var socket;
 var playerHands = [];
 
+export var emitEvent;
 
 export function initSocket() {
   //document.getElementById("play").style.setProperty("visibility", "hidden");
   //document.getElementById("play").style.visibility = "hidden";
-  alert('init socket2')
+  scene.startBabylonEngine()
   socket = io('http://localhost:8000').connect();
+  emitEvent = function(nameOfEvent) {
+    socket.emit(nameOfEvent);
+  }
   socket.on('connect', function() {
     socket.emit('start');
-  });
-
-  socket.on('receiveUpdate', function(data) {
-    createUpdateHand(data)
-  })
-
-  socket.on('bye', function(data) {
-    if (player2) {
-      player2.dispose()
+    emitEvent = function(nameOfEvent) {
+      socket.emit(nameOfEvent);
     }
   });
-
+  socket.on('palmRay',function(){
+    //scene.activePalmRay()
+    console.log('activate circle');
+  })
+  socket.on('editMesh', function() {
+    scene.changeColor()
+  })
 }

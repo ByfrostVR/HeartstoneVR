@@ -19,7 +19,7 @@ module.exports = {
     // (use the Node.js path module)
     filename: "[name].js",
     // the filename template for entry chunks
-    publicPath: "/"
+    publicPath: "/javascripts/"
   },
 
   plugins: [

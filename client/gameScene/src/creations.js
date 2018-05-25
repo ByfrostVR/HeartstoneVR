@@ -1,47 +1,31 @@
 import styles from './index.css';
 import * as BABYLON from 'babylonjs';
 import * as GUI from "babylonjs-gui";
+import * as utility from "./utility.js"
 import hand from './hand.js';
 import * as Leap from 'leapjs';
-
-export var scene, ground, selected, ray, camera, rightHand, leftHand, pastSelected;
+import * as Play from 'leapjs-playback';
+import * as Inspector from 'babylonjs-inspector'
+import * as client from './client.js'
+import * as index from './index.js'
+// import * as LeapGesture from 'leapjs-gesture'
+import {
+  handEntry,
+  handSwipe,
+  handFlip,
+  handFist
+} from 'leapjs-gesture'
+var scene, ground, selected, ray, rightHand, leftHand, pastSelected, frame;
 //export var musicBox = [];
 //var mouseOnly = false;
 var currentMeshSelected = null;
-var canvas = document.getElementById('canvas');
-export var engine = new BABYLON.Engine(canvas, true);
 var hands = {};
-
-var controller = new Leap.Controller({
+export var controller = new Leap.Controller({
   enableGestures: true,
   background: true,
-  loopWhileDisconnected: 'true'
+  loopWhileDisconnected: 'true',
+  optimizeHMD: 'true'
 })
-//creating scene, its properties and objects
-export function createScene() {
-  //creating scene
-  scene = new BABYLON.Scene(engine);
-  //initializing music
-  // music = new BABYLON.Sound("Music", "./assets/music/imTheOne.wav", scene)
-  //enabling phisics
-  //scene.enablePhysics();
-  //enable collisions
-  //scene.collisionsEnabled = true;
-  //creating camera
-  //createCamera();
-  //creating light
-  //createLight();
-  //creating ground
-  //createGround();
-  //will be used in the future createCard();
-
-  //creatng music box
-  //createMusicBoxes();
-  //creating GUI
-  //createGUI();
-  return scene;
-}
-
 //creating music box
 var createMusicBoxes = function() {
   //the object and parameters
@@ -82,32 +66,71 @@ var createGUI = function() {
 
 
 //creating ground and set its parameters
+
 var createGround = function() {
   //the object
-  ground = BABYLON.Mesh.CreateGround("ground", 1000, 1000, 0, scene, false);
-  //the material
-  var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
-  groundMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-  groundMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-  ground.material = groundMaterial;
-  //properties
-  ground.receiveShadows = true;
-  ground.physicsImpostor = new BABYLON.PhysicsImpostor(
-    ground, BABYLON.PhysicsImpostor.BoxImpostor, {
-      mass: 0,
-      restitution: 0.9
-    },
-    scene
-  );
-}
+  ground = BABYLON.MeshBuilder.CreateGround("myGround", {
+    width: 100,
+    height: 100,
+    subdivsions: 100
+  }, scene);
 
+  //   //the material
+  //   var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
+  //   groundMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+  //   groundMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+  //   ground.material = groundMaterial;
+  //   //properties
+  //   ground.receiveShadows = true;
+  //   ground.physicsImpostor = new BABYLON.PhysicsImpostor(
+  //     ground, BABYLON.PhysicsImpostor.BoxImpostor, {
+  //       mass: 0,
+  //       restitution: 0.9
+  //     },
+  //     scene
+  //   );
+  // }
+  return ground;
+}
 //creating camera
-var createCamera = function() {
+export var createCamera = function(canvas) {
   //vr camera and its position
-  camera = new BABYLON.VRDeviceOrientationFreeCamera(
-    "WebVRCamera", new BABYLON.Vector3(0, 190, 300), scene);
+  //camera = new BABYLON.VRDeviceOrientationFreeCamera(
+  //  "camera", new BABYLON.Vector3(0, 190, 300), scene);
   //camera's target
+  var camera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 14, 0), scene, true, {
+    trackPosition: false
+  });
   camera.setTarget(new BABYLON.Vector3(0, 190, 0))
-  camera.checkCollisions = true;
+  //camera.checkCollisions = true;
   camera.attachControl(canvas, true);
+  return camera;
+}
+//creating scene, its properties and objects
+export function createScene(engine, canvas) {
+  //creating scene
+  scene = new BABYLON.Scene(engine);
+  //initializing music
+  // music = new BABYLON.Sound("Music", "./assets/music/imTheOne.wav", scene)
+  //enabling phisics
+  scene.enablePhysics();
+  //enable collisions
+  scene.collisionsEnabled = true;
+  //creating camera
+
+  //creating light
+  createLight();
+  //creating ground
+  var ground = createGround();
+  var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {
+    diameter: 2
+  }, scene);
+  //alert('ground')
+  //will be used in the future createCard();
+
+  //creatng music box
+  //createMusicBoxes();
+  //creating GUI
+  createGUI();
+  return scene
 }
