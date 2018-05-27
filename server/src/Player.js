@@ -12,7 +12,8 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 var playerSchema = new mongoose.Schema({
   username: String,
   password: String,
-  playerName: String,
+  playerFName: String,
+  playerLName: String,
   wins: Number,
   losts: Number,
   money: Number

@@ -23,7 +23,7 @@ io.on('connection', function(socket) {
   })
   socket.on('meshSelected', function() {
     console.log('about To Change color');
-    socket.broadcast.to(socket.id).emit('editMesh')
+    socket.emit('editMesh');
   })
   socket.on('disconnect', function() {
     console.log("Client " + socket.id + " disconnected");
@@ -74,10 +74,10 @@ io.on('connection', function(socket) {
 })
 
 app.post('/api/v1/login', cors(issue2options), function(req, res) {
-  var username = req.body[0].value;
+  console.log('here');
+  var username = req.body.username;
   //var firend_id = req.body.friend;
-  var password = req.body[1].value;
-
+  var password = req.body.password;
   //enable Access-Control-Allow-Origin
   // res.set({
   //   "Content-Type": "application/json",
@@ -102,23 +102,32 @@ app.post('/api/v1/login', cors(issue2options), function(req, res) {
   });
 });
 
-app.post('/api/v1/sayHi', cors(), function(req, res) {
-  req.app.io.emit('hi', {
-    msg: 'well hello there!'
-  })
-})
 app.post('/api/v1/register', cors(), function(req, res) {
   //get user register data
-  var username = req.body[0].value;
-  var password = req.body[1].value
-  var playerName = req.body[2].value
-  createPlayer.createPlayer(username, password, playerName, Player)
+  var playerFName = req.body.firstname;
+  var playerLName = req.body.lastname;
+  var username = req.body.username;
+  var playerName = req.body.playerName;
+  var password = req.body.password;
+  player.createPlayer(username, password, playerFName, playerLName, Player, function(err, found) {
+    if (err) {
+      console.log("error - " + err);
+    } else if (found) {
+      res.json({
+        text: '{"status":"Registered"}'
+      });
+    } else {
+      res.json({
+        text: '{"status":"failedToLog"}'
+      });
+    }
+  })
 
   //enable Access-Control-Allow-Origin
 });
-app.post('/api/v1/joinGame', cors(issue2options), function(req, res) {
+app.post('/api/v1/joinGame', cors(), function(req, res) {
   //get user game id and the player
-  //console.log(req.body.roomName);
+  console.log(req.body);
   roomName = req.body.roomName;
   //add player to a game
   game.joinGame(Game, roomName, function(err, answer) {
@@ -153,7 +162,6 @@ app.post('/api/v1/exitGame', cors(issue2options), function(req, res) {
   })
 });
 app.post('/api/v1/getGames', cors(issue2options), function(req, res) {
-  console.log("here");
   game.getAllGames(Game, function(err, found) {
     if (err) {
       console.log("error - " + err);
@@ -166,7 +174,6 @@ app.post('/api/v1/getGames', cors(issue2options), function(req, res) {
 });
 app.post('/api/v1/createGame', cors(issue2options), function(req, res) {
   //get user game id and the player
-  //console.log(req);
   var roomName = req.body[0].value;
   if (roomName == '' || roomName == undefined || roomName == null) {
     res.json('{"status":"failed to create"}')
@@ -178,11 +185,9 @@ app.post('/api/v1/createGame', cors(issue2options), function(req, res) {
       } else if (answer == 'created') {
         console.log('good');
         res.json('{"status":"created the game"}')
-        res.end();
       } else {
         console.log('bad');
         res.json('{"status":"failed to create"}')
-        res.end();
       }
 
     })

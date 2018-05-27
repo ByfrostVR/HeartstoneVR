@@ -17,20 +17,129 @@ html {
 h1 {
   font-weight: 700;
   font-size: 5em;
-  text-shadow: 0px 4px 3px rgba(0,0,0,4),
-               0px 8px 13px rgba(0,0,0,1),
-               0px 18px 23px rgba(0,0,0,1);
+  text-shadow: 0px 4px 3px rgba(0, 0, 0, 4), 0px 8px 13px rgba(0, 0, 0, 1), 0px 18px 23px rgba(0, 0, 0, 1);
 }
 
 hr {
   width: 400px;
   border-top: 1px solid #f8f8f8;
-  border-bottom: 1px solid rgba(0,0,0,0.2)
-  text-shadow: 0px 4px 3px rgba(0,0,0,4),
-               0px 8px 13px rgba(0,0,0,1),
-               0px 18px 23px rgba(0,0,0,1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2) text-shadow: 0px 4px 3px rgba(0, 0, 0, 4), 0px 8px 13px rgba(0, 0, 0, 1), 0px 18px 23px rgba(0, 0, 0, 1);
 }
 
 a {
   color: #00B7FF;
+}
+
+/* Credit to bootsnipp.com for the css for the color graph */
+
+.colorgraph {
+  height: 5px;
+  border-top: 0;
+  background: #c4e17f;
+  border-radius: 5px;
+  background-image: -webkit-linear-gradient(left, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
+  background-image: -moz-linear-gradient(left, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
+  background-image: -o-linear-gradient(left, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
+  background-image: linear-gradient(to right, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
+}
+
+.btn-info {
+  color: #fff;
+  position: center;
+  background-color: #5bc0de;
+  border-color: #46b8da;
+  border-radius: 5px 5px;
+}
+
+.sidebarservices {
+  width: 25%;
+  padding: 20px 0 20px 20px;
+  float: left;
+}
+
+.sidebarservices .head {
+  text-align: center;
+  font-size: 15pt;
+  background: gray;
+  color: white;
+}
+
+.head:hover {
+  background: gray !important;
+  cursor: initial;
+}
+
+.sidebarservices li {
+  list-style: none;
+  background-color: #0e6eb7;
+  margin: 5px 10px;
+  text-align: left;
+  padding: 10px 0 10px 20px;
+  border-radius: 5px 5px;
+  cursor: pointer;
+}
+
+.sidebarservices li a {
+  text-decoration: none;
+  color: white !important;
+  font-family: Century Gothic, sans-serif;
+}
+
+.sidebarservices li:hover {
+  background: Aqua;
+  color: DarkCyan;
+}
+
+section {
+  padding: 100px 0;
+  text-align: center;
+}
+
+select.frecuency {
+  border: none;
+  font-style: italic;
+  background-color: transparent;
+  cursor: pointer;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+  -webkit-transition: -webkit-transform .35s ease-in;
+  transition: -webkit-transform .35s ease-in;
+  border-bottom: none;
+}
+
+select.frecuency:focus {
+  outline: none;
+  border-bottom: 5px solid #39b3d7;
+  -webkit-transform: translateY(-5px);
+  transform: translateY(-5px);
+  -webkit-transition: -webkit-transform .35s ease-in;
+  transition: -webkit-transform .35s ease-in;
+}
+
+.free {
+  text-transform: uppercase;
+}
+
+.input-group {
+  margin: 20px auto;
+  width: 100%;
+}
+
+input.btn.btn-lg, input.btn.btn-lg:focus {
+  outline: none;
+  width: 60%;
+  height: 60px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+button.btn {
+  width: 25%;
+  height: 60px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.promise {
+  color: #999;
 }

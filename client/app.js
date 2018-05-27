@@ -5,13 +5,14 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
 var index = require('./routes/index');
 var users = require('./routes/users');
 var scene = require('./routes/scene.js')
 var homePage = require('./routes/homePage.js')
 var createGame = require('./routes/createGame.js')
 var gameScene = require('./routes/gameScene.js')
+var register = require('./routes/register.js')
+
 
 var app = express();
 //app.use(cors())
@@ -43,6 +44,7 @@ app.use('/scene', scene);
 //app.use('/gameScene',gameScene)
 app.use('/homePage', homePage)
 app.use('/createGame', createGame)
+app.use('/register', register)
 app.get('/games/:gameName', gameScene);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

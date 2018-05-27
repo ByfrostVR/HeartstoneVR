@@ -36,13 +36,12 @@
     function checkCookie() {
       var user = getCookie("token");
       if (user == "") {
-        var temp = "index";
-        url = "http://localhost:3000/" + temp;
+        url = "http://localhost:3000/";
         window.location.replace(url);
         alert("You Are Not Signed In!");
       }
     }
-    var gettingGames = function() {
+    var getGames = function() {
       //get all existing games and display them as a list
       $.ajax({
         crossOrigin: true,
@@ -54,101 +53,69 @@
           //if the is games, create a list
           if (gList) {
             //create list object
-            var ObjUl = $('<ul></ul>');
+            var ObjUl = $('<ul class="sidebarservices"></ul>');
+            var HeadLi = $('<li class="head">Available Games</li>')
+            ObjUl.append(HeadLi)
             //if the list contain more than one object, use for each
             //otherwise just add on element
             if (gList.length > 1) {
               //for each game add a element
               $.each(gList, function(i) {
                 //create empty element
-                var Objli = $('<li></li>')
-                var Obja = $('<a></a>')
+                var Objli = $('<li onclick=UponClicking($(this))></li>')
                 $(Objli).attr('id', i + 1);
                 ObjUl.addClass('gameList')
-                Obja.addClass("specificGame");
-                Obja.text(gList[i])
-
-                Objli.append(Obja)
-
+                Objli.text(gList[i])
                 ObjUl.append(Objli)
+
               })
               //display all the elements in the games div
               $('.games').append(ObjUl);
             } else {
-              var Objli = $('<li></li>')
-              var Obja = $('<a></a>')
+              var Objli = $('<li onclick=UponClicking($(this))></li>')
               ObjUl.addClass('gameList')
-
-              Obja.addClass("specificGame");
-              Obja.text(gList)
-
-              Objli.append(Obja)
-
+              Objli.text(gList)
               ObjUl.append(Objli)
               $('.games').append(ObjUl);
             }
           }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
-          alert("Status: " + textStatus);
-          alert("Error: " + errorThrown);
+          console.log("Status: " + textStatus);
+          console.log("Error: " + errorThrown);
         },
         crossDomain: true,
         dataType: 'json',
         contentType: "application/json",
       });
-
-      $(function() {
-        $(document).ready(function() {
-          $(".gameList li a").click(function() {
-            alert('clicked')
-            var gameName = $(this).text()
-            var room = {
-              roomName: $(this).text()
-            };
-            room = JSON.stringify(room);
-            $.ajax({
-              crossOrigin: true,
-              type: "POST",
-              url: "http://localhost:8000/api/v1/joinGame",
-              data: room,
-              success: function(data) {
-                $.ajax({
-                  type: "GET",
-                  url: "http://localhost:3000/games/" + gameName,
-                  success: function(dataGet) {
-                    url = "http://localhost:3000/games/" + gameName
-                    window.location.replace(url)
-                  },
-                  error: function(XMLHttpRequest, textStatus, errorThrown) {
-                    alert(errorThrown)
-                  }
-                })
-              },
-              //change this html or move to the game html
-
-              error: function(XMLHttpRequest, textStatus, errorThrown) {
-                alert("Status: " + textStatus);
-                alert("Error: " + errorThrown);
-              },
-              crossDomain: true,
-              dataType: 'json',
-              contentType: "application/json",
-            });
-          });
-        });
-      });
-
-      var socket = io.connect();
-      socket.emit('hi', 'Hi!');
-      socket.on('hi', function(data) {
-        alert(data)
-      })
-    }
-
-    function start() {
-      checkCookie()
-      gettingGames()
+      //when you click on the li, get the first character which is the id of the game
+      //send the data as POST
+      //make json of id of the game, and the player from the html name field
+      //   var chosenRoom = {
+      //     roomName: $(this).text()
+      //   }
+      //
+      //
+      //   //send this json to the server, to add this player to the selected game
+      //   $.ajax({
+      //     crossOrigin: true,
+      //     type: "POST",
+      //     url: "http://localhost:8000/api/v1/joinGame",
+      //     data: chosenRoom,
+      //     success: function(data) {
+      //       //change this html or move to the game html
+      //     },
+      //     error: function(XMLHttpRequest, textStatus, errorThrown) {
+      //       alert("Status: " + textStatus);
+      //       alert("Error: " + errorThrown);
+      //     },
+      //     crossDomain: true,
+      //     dataType: 'json',
+      //     contentType: "application/json",
+      //   });
+      // })
+      //when you click on create game, emit a create game event
+      //when recieve into game event, change route or change page to the game
     }
   </script>
   <!-- <script type="text/javascript" src="js/jquery.ajax-cross-origin.min.js"></script> -->
@@ -160,6 +127,53 @@
       var temp = "createGame";
       url = "http://localhost:3000/" + temp;
       window.location.replace(url);
+    }
+
+    function start() {
+      checkCookie()
+      getGames()
+
+    }
+
+    function UponClicking(e) {
+      alert('clicked')
+      var gameName = $(e).text()
+      var room = {
+        roomName: $(e).text()
+      };
+      room = JSON.stringify(room);
+      $.ajax({
+        crossOrigin: true,
+        type: "POST",
+        url: "http://localhost:8000/api/v1/joinGame",
+        data: room,
+        crossDomain: true,
+        success: function(data) {
+          console.log('s1')
+          $.ajax({
+            crossOrigin: true,
+            crossDomain: true,
+            type: "GET",
+            url: "http://localhost:3000/games/" + gameName,
+            success: function(dataGet) {
+              console.log('s2')
+              url = "http://localhost:3000/games/" + gameName
+              console.log(url)
+              window.location.replace(url)
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+              console.log(errorThrown)
+            }
+          })
+        },
+        //change this html or move to the game html
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          console.log("Status: " + textStatus);
+          console.log("Error: " + errorThrown);
+        },
+        dataType: 'json',
+        contentType: "application/json",
+      });
     }
   </script>
   <link rel='stylesheet' href='/stylesheets/style.css' />
@@ -176,19 +190,20 @@
     <span class="icon-bar"></span>
     <span class="icon-bar"></span>
   </button>
-        <a class="navbar-brand" href="./homePage.ejs">HeartstoneVR</a>
+        <a class="navbar-brand" href="/homePage">HeartstoneVR</a>
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav">
-          <li class="active"><a href="./homePage">Home</a></li>
-          <li><a href="./contact">Contact</a></li>
+          <li class="active"><a href="/homePage">Home</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/register">Register</a></li>
         </ul>
         </li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="./createGame">Create Game<span class="sr-only">(current)</span></a></li>
+          <li><a href="/createGame">Create Game<span class="sr-only">(current)</span></a></li>
         </ul>
       </div>
       <!-- /.navbar-collapse -->
@@ -198,7 +213,7 @@
   <h1><%= title %></h1>
   <div class="games">
   </div>
-  <button onclick="creation()">create game</button>
+  <button onclick="creation()" class="btn btn-info btn-cons">create game</button>
 </body>
 
 </html>

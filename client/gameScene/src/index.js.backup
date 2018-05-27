@@ -1,0 +1,22 @@
+import styles from './index.css';
+import * as BABYLON from 'babylonjs';
+window.addEventListener('DOMContentLoaded', function() {
+  var canvas = document.getElementById('canvas');
+
+  var engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+  var scene = new BABYLON.Scene(engine);
+  var light = new BABYLON.PointLight("Omni0", new BABYLON.Vector3(-17.6, 18.8, -49.9), scene);
+  var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+
+  camera.attachControl(canvas, true);
+
+  var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {
+    diameter: 2
+  }, scene);
+
+  engine.runRenderLoop(function() {
+    scene.render();
+   });
+
+
+});

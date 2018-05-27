@@ -51,9 +51,7 @@
     function sendData() {
       //get the data from the form and alter it to json file
       var formData = JSON.stringify($("#gameCreate").serializeArray());
-      var gameName = $("#gameCreate").serializeArray()[0].value
-      alert(formData);
-
+      var gameName = $("#gameCreate").serializeArray()
       //send the data as POST
       $.ajax({
         crossOrigin: true,
@@ -64,12 +62,10 @@
           //get the value of the object
           //parse the object into JSON
           data = JSON.parse(data)
-          console.log(data);
-          console.log(data.status);
           //if the user does exist, change its route to the homePage.
           //if no, stay in the login
           if (data.status == "created the game") {
-            url = "http://localhost:3000/games/" + gameName;
+            url = "http://localhost:3000/games/" + gameName[0].value;
             window.location.replace(url);
           } else {
             alert('something went wrong')
@@ -79,8 +75,6 @@
           }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
-          alert("Status: " + textStatus);
-          alert("Error: " + errorThrown);
           window.location.replace("http://localhost:3000/homePage")
 
         },
@@ -122,12 +116,28 @@
       </div>
       <!-- /.container-fluid -->
     </nav>
-    <form id="gameCreate" onsubmit="sendData()">
-      <div class="form-group">
-        <label>Game Name - </label>
-        <input type="txt" name="gameName" placeholder="Name Of The Game">
-        <input type="submit" value="Create">
-    </form>
+    <section>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6 col-md-offset-3">
+            <hgroup>
+              <h2>
+            HeartstoneVR
+          </h2>
+              <h1 class="free">Create A Game</h1>
+            </hgroup>
+            <div class="well">
+              <form id="gameCreate" onsubmit="sendData()">
+                <div class="input-group">
+                  <input class="btn btn-lg" type="txt" name="gameName" placeholder="Name Of The Game" required>
+                  <button class="btn btn-info btn-lg" type="submit">Create</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </body>
 
 </html>

@@ -1,20 +1,20 @@
 module.exports = {
   //create player according to registration data
 
-  createPlayer: function(username, password, playerName, player) {
+  createPlayer: function(username, password, playerFName,playerLName, player, answer) {
     player.create({
       username: username,
       password: password,
-      playerName: playerName,
+      playerFName: playerFName,
+      playerLName: playerLName,
       wins: 0,
       losts: 0,
       money: 0
     }, function(err, p) {
       if (err) {
-        console.log("SOMETHING WENT WRONG");
-        console.log(err);
+        answer(err,false)
       } else {
-        console.log("Saved!!");
+        answer(null,true);
       }
     })
   },
@@ -26,6 +26,7 @@ module.exports = {
       'password': password
     }, function(err, p) {
       if (err || p.length == 0) {
+        console.log('jne');
         found(null,false);
       } else {
         console.log("je");

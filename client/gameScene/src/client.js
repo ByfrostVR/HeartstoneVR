@@ -37,6 +37,7 @@ export function initSocket() {
     console.log('activate circle');
   })
   socket.on('editMesh', function() {
+    console.log('did');
     scene.changeColor()
   })
 }

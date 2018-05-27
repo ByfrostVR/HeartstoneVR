@@ -42,6 +42,7 @@ window.addEventListener('DOMContentLoaded', function() {
   changeColor = function() {
     var tempMesh = scene.getMeshByName('cubeOne');
     if (tempMesh) {
+      console.log('here');
       var materialTemp = new BABYLON.StandardMaterial("temp", scene);
       materialTemp.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random())
       tempMesh.material = materialTemp
@@ -53,6 +54,7 @@ window.addEventListener('DOMContentLoaded', function() {
   var camera = new BABYLON.VRDeviceOrientationFreeCamera(
     "WebVRCamera", new BABYLON.Vector3(20, 180, 180), scene);
   //camera's target
+
   var ground = BABYLON.MeshBuilder.CreateGround("myGround", {
     width: 10000,
     height: 10000,

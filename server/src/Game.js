@@ -29,7 +29,7 @@ gameSchema.method('joinGame', function(success) {
       if (err) {
         console.log('err -' + err);
       } else {
-        console.log(updated);
+        success(null,'created')
       }
     })
 
@@ -46,13 +46,15 @@ gameSchema.method('joinGame', function(success) {
       if (err) {
         console.log('err -' + err);
       } else {
-        console.log(updated);
       }
     })
 
     console.log('added player');
     return success(null, 'added')
   } else if (this.players >= 2) {
+    this.set({
+      available: false
+    })
     return success(null, 'full')
   } else {
     return success(null, 'something went wrong')

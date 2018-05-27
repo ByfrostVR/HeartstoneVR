@@ -15,7 +15,7 @@ module.exports = {
         returnAnswer(err, null)
       } else {
         g.joinGame(function(err, answer) {
-          if (answer == 'added') {
+          if (answer == 'added' || answer == 'created') {
             returnAnswer(null, 'created')
           } else {
             returnAnswer(null, 'the room is full')
@@ -26,12 +26,13 @@ module.exports = {
     })
   },
   joinGame: function(game, rn, returnAnswer) {
+    console.log('here2');
     game.findOne({
       'roomName': rn
     }, function(err, foundGame) {
       if (err) {
         console.log('error - ' + err);
-      } else if (foundGame.length != 0) {
+      } else if (foundGame) {
         foundGame.joinGame(returnAnswer, function(err, answer) {
           if (err) {
             returnAnswer(err, null)
@@ -40,6 +41,7 @@ module.exports = {
           }
         })
       } else {
+        console.log(foundGame);
         returnAnswer(null, 'not found')
       }
     })

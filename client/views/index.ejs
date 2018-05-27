@@ -4,6 +4,11 @@
 <head>
   <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <title>HeartstoneVR</title>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
   <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans" rel="stylesheet">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <link rel="stylesheet" href="../stylesheets/style.css">
@@ -42,7 +47,7 @@
       if (user != "") {
         alert("Welcome again");
         var temp = "homePage";
-        url = "http://" +getmyurl+":3000/" + temp;
+        url = "http://" + 'localhost' + ":3000/" + temp;
         window.location.replace(url);
       }
     }
@@ -99,14 +104,15 @@
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-        <a class="navbar-brand" href="#">HearthstoneVR</a>
+        <a class="navbar-brand" href="/homePage">HearthstoneVR</a>
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav">
-          <li class="active"><a href="./index">Login</a></li>
-          <li><a href="./contact">Contact</a></li>
+          <li class="active"><a href="/index">Login</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/register">Register</a></li>
         </ul>
         </li>
         </ul>
@@ -115,13 +121,35 @@
     </div>
     <!-- /.container-fluid -->
   </nav>
-  <form id="myform" onsubmit="sendData()">
-    <label>Username</label>
-    <input type="text" name="username" class="form-control" placeholder="Username">
-    <label>Password</label>
-    <input type="password" name="password" class="form-control" placeholder="Password">
-    <input type="submit" class="btn btn-default" value="Login">
-  </form>
+  <div class="container">
+
+    <div class="row" style="margin-top:20px">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+        <form role="form" onsubmit="sendData()">
+          <fieldset>
+            <h2>Please Sign In</h2>
+            <hr class="colorgraph">
+            <div class="form-group">
+              <input type="text" name="username" id="email" class="form-control input-lg" placeholder="Username">
+            </div>
+            <div class="form-group">
+              <input type="password" name="password" id="password" class="form-control input-lg" placeholder="Password">
+            </div>
+            <hr class="colorgraph">
+            <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6">
+                <input type="submit" class="btn btn-lg btn-success btn-block" value="Sign In">
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6">
+                <a href="/register" class="btn btn-lg btn-primary btn-block">Register</a>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+
+  </div>
 </body>
 
 </html>

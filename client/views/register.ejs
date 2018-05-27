@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <title>HeartstoneVR</title>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="../stylesheets/style.css">
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
+
+  <!-- <script type="text/javascript" src="js/jquery.ajax-cross-origin.min.js"></script> -->
+  <script>
+    var agreeTerms = false;
+    // var io = require("socket.io");
+    // var socket = io.connect();
+    // socket.on('connect', function() {})
+    function setCookie(token, tempId, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      var expires = "expires=" + d.toGMTString();
+      document.cookie = token + "=" + tempId + ";" + expires + ";path=/";
+    }
+
+    function getCookie(token) {
+      var id = token + "=";
+      var decodedCookie = decodeURIComponent(document.cookie);
+      var ca = decodedCookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(id.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function checkCookie() {
+      var user = getCookie("token");
+      if (user != "") {
+        alert("Welcome again");
+        var temp = "homePage";
+        url = "http://" + 'localhost' + ":3000/" + temp;
+        window.location.replace(url);
+      }
+    }
+
+    //send the login data to the main server for authentication
+    function sendData() {
+      //get the data from the form and alter it to json file
+      var s = 'please fill the - '
+      $('#1 :input').each(function() {
+        if ($(this).attr('placeholder') && ($(this).val() == undefined || $(this).val() == '' || !($(this).val() == undefined))) {
+          s = s + ($(this).attr('placeholder')) + ', ';
+        }
+      })
+      if (s != 'please fill the - ') {
+        alert(s + 'fields')
+        return;
+      }
+
+      alert(agreeTerms)
+      if (!agreeTerms) {
+        alert('Agree To The Terms Please.')
+        return;
+      }
+
+      var formData = JSON.stringify($("#myform").serializeArray());
+      //send the data as POST
+      $.ajax({
+        crossOrigin: true,
+        type: "POST",
+        url: "http://localhost:8000/api/v1/register",
+        data: formData,
+        success: function(data) {
+          //get the value of the object
+          data = data.text
+          //parse the object into JSON
+          data = JSON.parse(data)
+          //if the user does exist, change its route to the homePage.
+          //if no, stay in the login
+          alert(data.status);
+          if (data.status == "Registered") {
+            var url = "http://localhost:3000/";
+            window.location.replace(url);
+            //socket.emit('logged in')
+          } else {
+            var url = "http://localhost:3000/register";
+            window.location.replace(url);
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          window.location.replace("http://localhost:3000/")
+
+        },
+        crossDomain: true,
+        dataType: 'json',
+        contentType: "application/json"
+      });
+    }
+
+    $(function() {
+      $('.button-checkbox').each(function() {
+
+        // Settings
+        var $widget = $(this),
+          $button = $widget.find('button'),
+          $checkbox = $widget.find('input:checkbox'),
+          color = $button.data('color'),
+          settings = {
+            on: {
+              icon: 'glyphicon glyphicon-check'
+            },
+            off: {
+              icon: 'glyphicon glyphicon-unchecked'
+            }
+          };
+
+        // Event Handlers
+        $button.on('click', function() {
+          $checkbox.prop('checked', !$checkbox.is(':checked'));
+          $checkbox.triggerHandler('change');
+          updateDisplay();
+        });
+        $checkbox.on('change', function() {
+          updateDisplay();
+        });
+
+        // Actions
+        function updateDisplay() {
+          var isChecked = $checkbox.is(':checked');
+
+          // Set the button's state
+          $button.data('state', (isChecked) ? "on" : "off");
+
+          // Set the button's icon
+          $button.find('.state-icon')
+            .removeClass()
+            .addClass('state-icon ' + settings[$button.data('state')].icon);
+
+          // Update the button's color
+          if (isChecked) {
+            agreeTerms = true
+            $button
+              .removeClass('btn-default')
+              .addClass('btn-' + color + ' active');
+          } else {
+            agreeTerms = false
+            $button
+              .removeClass('btn-' + color + ' active')
+              .addClass('btn-default');
+          }
+        }
+
+        // Initialization
+        function init() {
+
+          updateDisplay();
+
+          // Inject the icon if applicable
+          if ($button.find('.state-icon').length == 0) {
+            $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i>');
+          }
+        }
+        init();
+      });
+    });
+  </script>
+</head>
+
+<body onload="checkCookie()">
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+        <a class="navbar-brand" href="/homePage">HearthstoneVR</a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li><a href="/">Login</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li class="active"><a href="/register">Register</a></li>
+        </ul>
+        </li>
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container-fluid -->
+  </nav>
+  <div class="container">
+
+    <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+        <form id=1 role="form" onsubmit="sendData()">
+          <h2>Please Sign Up <small>It's free and always will be.</small></h2>
+          <hr class="colorgraph">
+          <div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-6">
+              <div class="form-group">
+                <input type="text" name="firstname" id="first_name" class="form-control input-lg" placeholder="First Name" tabindex="1">
+              </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6">
+              <div class="form-group">
+                <input type="text" name="lastname" id="last_name" class="form-control input-lg" placeholder="Last Name" tabindex="2">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <input type="text" name="username" id="username" class="form-control input-lg" placeholder="Username" tabindex="4">
+          </div>
+          <div class="form-group">
+            <input type="text" name="playerName" id="playerName" class="form-control input-lg" placeholder="Player Name" tabindex="4">
+          </div>
+          <div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-6">
+              <div class="form-group">
+                <input type="password" name="password" id="password" class="form-control input-lg" placeholder="Password" tabindex="5">
+              </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6">
+              <div class="form-group">
+                <input type="password" name="password_confirmation" id="password_confirmation" class="form-control input-lg" placeholder="Confirm Password" tabindex="6">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xs-4 col-sm-3 col-md-3">
+              <span class="button-checkbox">
+						<button type="button" class="btn" data-color="info" tabindex="7">I Agree</button>
+                        <input type="checkbox" name="t_and_c" id="t_and_c" class="hidden" value="1">
+					</span>
+            </div>
+            <div class="col-xs-8 col-sm-9 col-md-9">
+              By clicking <strong class="label label-primary">Register</strong>, you agree to the <a href="#" data-toggle="modal" data-target="#t_and_c_m">Terms and Conditions</a> set out by this site, including our Cookie Use.
+            </div>
+          </div>
+
+          <hr class="colorgraph">
+          <div class="row">
+            <div class="col-xs-12 col-md-6"><input type="submit" value="Register" class="btn btn-primary btn-block btn-lg" tabindex="7"></div>
+            <div class="col-xs-12 col-md-6"><a href="/" class="btn btn-success btn-block btn-lg">Sign In</a></div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="t_and_c_m" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title" id="myModalLabel">Terms & Conditions</h4>
+          </div>
+          <div class="modal-body">
+            <p> Keep aligned with the industry on open source technology standards by avoiding creating unique tech stacks that Oath alone would have to manage at its own expense.</p>
+            <p>Make it easy for engineers to interact with open source as users and as contributors.</p>
+            <p>Be viewed as an open source friendly company for partnerships and collaborations.</p>
+            <p>Be known as a great place for engineers to work on open source projects.</p>
+            <p>Give back to the Open Source community by sharing code and practices.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">I Agree</button>
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+  </div>
+</body>
+
+</html>
