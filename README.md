@@ -20,3 +20,5 @@ We want to create full game experience by implementing Heartstone into virtual r
  - check our issues
  - pick your favorite issue(there is some enjoyable issues...)
  - leave a message or contact us about anything!
+### Preview:
+ [Leapmotion and BabylonJS integration](https://www.youtube.com/watch?v=juBidOKP5g4&feature=youtu.be)
