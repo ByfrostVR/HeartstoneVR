@@ -1,24 +1,30 @@
-# HeartstoneVR
+# Project "Loki"
 
 ## Description
-### From wikipedia: [Source](https://en.wikipedia.org/wiki/Hearthstone_(video_game) "Source")
-> "Hearthstone, originally known as Hearthstone: Heroes of Warcraft, is a free-to-play online collectible card video game developed and published by Blizzard Entertainment.
-The game is a turn-based card game between two opponents, using constructed decks of 30 cards along with a selected hero with a unique power. Players use their limited mana crystals to cast spells or summon minions to attack the opponent, with the goal of reducing the opponent's health to zero."
+As Loki is the god of mischief, illusions and lies. We, in the "Loki Project" want to create a platform where you can build and interact your own illusionis/virtual world, with as less hardware as we can. Therefore we used Leapmotion, a cheap device which anyone can afford, and we use the phone as a VR device so the platform will be accesible to everyone, and of course - **it's open source!**
+## Our goals:
+ - [ ] Create a **VR platform** without hardware limitation(without keyboard/mouse/game controller).
+ - [ ] Make the platform easy to use, **accesible and affordable**.
+ - [ ] Spread our platform to the pulic, and to let them easily integrate their systems with the project(whether its a managment systems, gaming, financial, graphs etc...)
 
-## Our goal:
-We want to create full game experience by implementing Heartstone into virtual reality environment by using [BabylonJS](https://www.babylonjs.com/)(javascript game engine), and [Leapmotion](https://www.leapmotion.com/) to interact with the world. The game will run on the browser.
+__Using [BabylonJS](https://www.babylonjs.com/)(javascript game engine), and [Leapmotion](https://www.leapmotion.com/) to interact with the platform -__
+### we can make it possible! But we need you!
 
-### Technologies:
+### The technologies we are using :
  - NodeJS
  - BabylonJS
  - Leapmotion
  - LeapJS
+ 
 ### Currently we managed to:
- - integrate Leapmotion with BabylonsJS
- - create a simple event handling server
+ - [x] Integrate Leapmotion with BabylonsJS
+ - [x] Create a simple event handling server
 ### How can you donate?
- - check our issues
- - pick your favorite issue(there is some enjoyable issues...)
- - leave a message or contact us about anything!
+ - Check our issues
+ - Pick your favorite issue(there is some enjoyable issues...)
+ - Leave a message or contact us about anything!
 ### Preview:
  [Leapmotion and BabylonJS integration](https://www.youtube.com/watch?v=juBidOKP5g4&feature=youtu.be)
+
+### Author:
+Yotam Fromm - yfromm@redhat.com
