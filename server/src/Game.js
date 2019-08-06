@@ -1,6 +1,6 @@
 var mongoose = require("mongoose")
 
-mongoose.connect("mongodb://localhost:27017/heartstone")// if error it will throw async error
+mongoose.connect("mongodb+srv://Yotam:nwonSoyPhiTkYqs7@lokidb-orjxa.mongodb.net/test?retryWrites=true&w=majority")// if error it will throw async error
 //mongoose.Promise = global.Promise;
 //Get the default connection
 var db = mongoose.connection;

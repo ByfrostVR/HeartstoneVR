@@ -1,7 +1,7 @@
 {
   "name": "babylonserver",
   "version": "1.0.0",
-  "description": "server for the heartstone game",
+  "description": "server for the platform",
   "main": "app.js",
   "scripts": {
     "start": "nodemon src/app.js"
